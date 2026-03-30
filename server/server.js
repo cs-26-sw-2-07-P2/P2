@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
+require('dotenv').config();
 
 // Serve frontend
 app.use(express.static('public'));
