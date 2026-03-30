@@ -3,8 +3,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 require('dotenv').config();
 
-// Serve frontend
-app.use(express.static('public'));
+// Serve all static files (CSS, JS, images)
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Attempt to load database if USE_DB=true
 let pool = null;
@@ -38,5 +38,8 @@ app.get('/api/users', async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/../public/index.html');
 });
+
+// Routing
+app.get('/employee', (req, res) => res.sendFile(path.join(__dirname, '../public/employee.html')));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
