@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const path = require('node:path');
 require('dotenv').config();
 
 // Serve all static files (CSS, JS, images)
@@ -41,5 +42,6 @@ app.get('/', (req, res) => {
 
 // Routing
 app.get('/employee', (req, res) => res.sendFile(path.join(__dirname, '../public/employee.html')));
+app.get('/manager', (req, res) => res.sendFile(path.join(__dirname, '../public/manager.html')));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
