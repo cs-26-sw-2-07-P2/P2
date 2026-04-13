@@ -1,4 +1,4 @@
-P2 Projekt
+# P2 Projekt
 
 # Start database
 docker compose up -d
