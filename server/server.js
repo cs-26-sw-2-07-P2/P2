@@ -45,7 +45,10 @@ app.get("/employee/questionnaires", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeQuestionnaires.html")),
 );
 app.get("/manager", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/manager.html")),
+  res.sendFile(path.join(__dirname, "../public/html/managerPages/manager.html")),
 );
+app.get("/manager/questionnaire", (req, res) =>
+  res.sendFile(path.join(__dirname, "../public/html/managerPages/questionnaire.html"))
+)
 
 app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
