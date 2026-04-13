@@ -52,10 +52,10 @@ app.post("/login", (req, res) => {
 
 // Routing
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/../public/index.html");
+  res.sendFile(path.join(__dirname, "../public/html/index.html"));
 });
 app.get("/employee", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/employee.html")),
+  res.sendFile(path.join(__dirname, "../public/html/employeePages/employee.html")),
 );
 app.get("/manager", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/manager.html")),
