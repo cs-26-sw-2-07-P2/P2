@@ -1,2 +1,8 @@
-// button to create new questionnaire
-<button onclick="createQuestionnaire()">Create Questionnaire</button>
+let questionnaire = document.querySelector(".questionnaire");
+
+questionnaire.addEventListener("click", createQuestionnaire);
+
+
+function createQuestionnaire() {
+    console.log("Button clicked");
+};
