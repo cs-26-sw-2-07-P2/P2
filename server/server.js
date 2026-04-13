@@ -144,8 +144,11 @@ app.get("/employee/questionnaires", requireLogin, requireRole("employee"), (req,
   res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeQuestionnaires.html")),
 );
 app.get("/manager", requireLogin, requireRole("manager"), (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/manager.html")),
+  res.sendFile(path.join(__dirname, "../public/html/managerPages/manager.html")),
 );
+app.get("/manager/questionnaire", (req, res) =>
+  res.sendFile(path.join(__dirname, "../public/html/managerPages/questionnaire.html"))
+)
 
 // Destroy current session if logout is recieved
 app.post("/logout", (req, res) => {

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+table, td {
+border: 1px solid black;
+padding: 8px;
+margin: auto;
+border-collapse: collapse;
+        }
+#button-container {
+padding: 8px;
+text-align: center;
+        }
+</style>
+</head>
+<body>
+    <table id="questionnaire">
+        <tr>
+            <th>Question</th>
+            <th>Most Applicable Team</th>
+        </tr>
+        <tr>
+            <td><input type="text" placeholder="Enter Question"></input></td>
+            <td>
+                <select name="" id="">
+                    <option value="AAA">AAA</option>
+                    <option value="BBB">BBB</option>
+                </select>
+            </td>
+            <td><button onclick="deleteRow(this)">Delete This Question...</button></td>
+        </tr>   
+    </table>
+<div id="button-container">
+    <button onclick="addRow()">Add New Row...</button>
+    <button onclick="saveQuestionnaire()">Save Questionnaire</button>
+    <button onclick="loadSavedQuestionnaire()">Load Questionnaire</button>
+    <button onclick="clearQuestionnaire()">Clear Questionnaire</button>
+</div>
+
+
+<script>
+
+// Syntetisk data der kan slettes senere
+const savedData = [
+    { question: "How are your backend skills?", team: "AAA" },
+    { question: "How are your frontend skills?", team: "BBB" }
+];
+
+function addDropDownOptions(teamData){
+    return savedData.team
+}
+
+
+function clearQuestionnaire(){
+    const table = document.getElementById("questionnaire");
+    const rows = table.rows;
+    for (let i = rows.length - 1; i > 0; i--){
+        table.deleteRow(i);
+    }
+}
+
+function loadSavedQuestionnaire(){
+    const table = document.getElementById("questionnaire");
+
+    clearQuestionnaire();
+    
+
+
+    for (let i = 0; i < savedData.length; i++){
+        const newRow = table.insertRow(-1);
+        newRow.innerHTML = 
+        `<tr>
+            <td><input type="text" value="${savedData[i].question}"></input></td>
+            <td>
+                <select name="" id="" value="${savedData[i].team}">
+                    <option value="AAA">AAA</option>
+                    <option value="BBB">BBB</option>
+                </select>
+                <td><button onclick="deleteRow(this)">Delete This Question...</button></td>
+            </td>
+        </tr>`
+        ;
+    }
+}
+
+
+function saveQuestionnaire(){
+    const table = document.getElementById("questionnaire");
+    const rows = table.rows;
+    const data = [];
+
+    for (let i  = 1; i < rows.length; i++){
+        const question = rows[i].cells[0].querySelector("input").value;
+        const team = rows[i].cells[1].querySelector("select").value;
+
+        data.push({question, team})
+    }
+
+    console.log(data);
+
+}
+
+
+function addRow(){
+    const table = document.getElementById("questionnaire");
+    const newRow = table.insertRow(-1);
+    newRow.innerHTML = 
+            `<tr>
+                <td><input type="text" placeholder="Enter Question"></input></td>
+                <td>
+                    <select name="" id="">
+                        <option value="AAA">AAA</option>
+                        <option value="BBB">BBB</option>
+                    </select>
+                    <td><button onclick="deleteRow(this)">Delete This Question...</button></td>
+                </td>
+            </tr>`
+            ;
+    }
+function deleteRow(btn){
+    const row = btn.closest("tr");
+    row.parentElement.deleteRow(row.rowIndex);
+}
+
+</script>
+</body>
+</html>
