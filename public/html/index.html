@@ -1,11 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Users</title>
-</head>
-<body>
-  <h1>User List</h1>
-  <script src="./js/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <link rel="stylesheet" href="/style/style.css" />
+  </head>
+  <body>
+    <form id="loginForm">
+      <h2>Login</h2>
+      <label for="username"><b>Username</b></label>
+      <input
+        id="username"
+        type="text"
+        placeholder="Enter Username"
+        name="username"
+        required
+      />
+
+      <label for="password"><b>Password</b></label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter Password"
+        name="password"
+        required
+      />
+
+      <button type="submit">Login</button>
+      <label>
+        <input type="checkbox" checked="checked" name="remember" /> Remember me?
+      </label>
+    </form>
+    <script src="/js/login.js"></script>
+  </body>
 </html>
