@@ -61,4 +61,4 @@ app.get("/manager", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/manager.html")),
 );
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
