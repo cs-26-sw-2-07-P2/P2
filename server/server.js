@@ -57,6 +57,9 @@ app.get("/", (req, res) => {
 app.get("/employee", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/html/employeePages/employee.html")),
 );
+app.get("/employee/questionnaires", (req, res) =>
+  res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeQuestionnaires.html")),
+);
 app.get("/manager", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/manager.html")),
 );
