@@ -1,4 +1,4 @@
-body {
+#loginBody {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -37,4 +37,57 @@ button {
 
 button:hover {
   opacity: 0.8;
+}
+
+/* WILLY STYLES (imagine hvis jeg hed harry lmao så havde det været harry styles)*/
+
+.boxOngoing {
+   width: 150px;
+   height: 150px;
+   border: 5px solid rgb(90, 209, 88);
+   padding: 20px;
+   margin: 20px;
+   position: relative;
+   display: flex;
+   text-align: center;
+}   
+.boxCompleted {
+  width: 150px;
+  height: 150px;
+  border: 5px solid rgb(135, 135, 135);
+  padding: 20px;
+  margin: 20px;
+  position: relative;
+  display: flex;
+  text-align: center;
+}
+.empQuestionnaire {
+  width: 150px;
+  height: 50px;
+  border: 5px solid rgb(63, 63, 63);
+  padding: 20px;
+  margin: auto;
+  margin-top: 20px;
+  text-align: center; 
+}
+.topnav {
+  display: flex;
+  background-color: #333;
+  width: 100%;
+}
+
+.topnav a {
+  color: #f2f2f2;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: #04AA6D;
+  color: white;
 }

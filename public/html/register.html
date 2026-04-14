@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Login</title>
+    <title>Register</title>
     <link rel="stylesheet" href="/style/style.css" />
   </head>
   <body>
-    <div id="loginBody">
-    <form id="loginForm">
-      <h2>Login</h2>
+    <div id="registerBody">
+    <form id="registerForm">
+      <h2>Register</h2>
       <label for="username"><b>Username</b></label>
       <input
         id="username"
@@ -27,12 +27,14 @@
         required
       />
 
-      <button type="submit">Login</button>
-      <label>
-        <input type="checkbox" checked="checked" name="remember" /> Remember me?
-      </label>
+      <label for="password"><b>Confirm Password</b></label>
+      <input id="confirmPassword" type="password" placeholder="Confirm password" />
+
+      <label><input type="checkbox" id="isManager" />Register as manager</label>
+
+      <button type="submit">Register</button>
     </form>
     </div>
-    <script src="/js/login.js"></script>
+    <script src="/js/register.js"></script>
   </body>
 </html>

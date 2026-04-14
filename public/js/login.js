@@ -17,10 +17,15 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     if (response.ok) {
       console.log("Login Success");
-      window.location.href = "/employee";
+
+      // ✅ Use backend redirect
+      window.location.href = data.redirect;
+
     } else {
+      alert(data.error);
       console.log("Login Failed!");
     }
+
   } catch (error) {
     console.error("Error:", error);
   }
