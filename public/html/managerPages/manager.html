@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style/style.css">
+    <title>Manager Site</title>
+    <link rel="stylesheet" href="../../style/style.css">
 </head>
 <body>
    <div class="topnav">
      <a class="active" href="#home">Home</a>
      <a href="#contact">Contact us</a>
      <a href="#about">About</a>
+     <a id="logout">Log out</a> 
    
 </div> 
     <h1>Manager site</h1>
@@ -38,9 +39,9 @@
             <div class="Task">
                 <p>Here you can list what abilities are required for each task.</p>
 
-            <button class="Create Task" type="button" onclick="createtask()">Create New Task</button>
-            <button class="Edit Task" type="button" onclick="editTask()">Edit Existing Task</button>
-            <button class="Task overview" type="button" onclick="viewTaskOverview()">Task Overview</button>
+            <button class="createTask" type="button" onclick="createtask()">Create New Task</button>
+            <button class="editTask" type="button" onclick="editTask()">Edit Existing Tasks</button>
+            <button class="taskOverview" type="button" onclick="viewTaskOverview()">Task Overview</button>
         </div>
 
                
@@ -56,9 +57,9 @@
             <p>Here you can see all the teams you have created, and edit them.</p>
                     
     
-        <button class="team" type="button">Create New Team</button>
-        <button class="team" type="button">Edit Existing Team</button>
-        <button class="team" type="button">Team overview</button>
+        <button class="createTeam" type="button" onclick="createTeam()">Create New Team</button>
+        <button class="editTeam" type="button" onclick="editTeam()">Edit Existing Teams</button>
+        <button class="teamOverview" type="button" onclick="viewTeamOverview()">Team Overview</button>
     </div>
 </section>
 
@@ -71,15 +72,15 @@
          <p>Here you can see all the questionnaires you have created, and edit them.</p>
                  
 
-     <button class="questionnaire" type="button">Create New Questionnaire</button>
-     <button class="questionnaire" type="button">Edit Existing Questionnaire</button>
-     <button class="questionnaire" type="button">Answers from Questionnaires</button>
+     <button class="createQuestionnaire" type="button" onclick="createQuestionnaire()">Create New Questionnaire</button>
+     <button class="editQuestionnaire" type="button" onclick="editQuestionnaire()">Edit Existing Questionnaires</button>
+     <button class="viewQuestionnaireAnswers" type="button" onclick="viewQuestionnaireAnswers()">Answers from Questionnaires</button>
  </div>      
 </fieldset>
 </form>
 </section>
 
 </main>
-<script src="js/manager.js"></script>
+<script type="module" src="../../js/manager.js"></script>
 </body>
 </html>

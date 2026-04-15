@@ -18,7 +18,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     if (response.ok) {
       console.log("Login Success");
 
-      // ✅ Use backend redirect
       window.location.href = data.redirect;
 
     } else {

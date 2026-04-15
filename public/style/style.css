@@ -91,3 +91,9 @@ button:hover {
   background-color: #04AA6D;
   color: white;
 }
+
+#logout {
+  position: absolute; 
+  right: 0; 
+  margin-right: 7px;
+}

@@ -70,6 +70,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Destroy current session if logout is recieved
+app.post("/logout", (req, res) => {
+  req.session.destroy();
+  res.json({ success: true, redirect: "/" });
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -149,11 +155,5 @@ app.get("/manager", requireLogin, requireRole("manager"), (req, res) =>
 app.get("/manager/questionnaire", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/html/managerPages/questionnaire.html"))
 )
-
-// Destroy current session if logout is recieved
-app.post("/logout", (req, res) => {
-  req.session.destroy();
-  res.json({ success: true });
-});
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
