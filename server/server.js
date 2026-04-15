@@ -6,6 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
+const dev_mode = true; // only for development
 
 app.use(express.json()); // Important for json formatting (Loginpage)
 
@@ -171,7 +172,9 @@ const routes = [
 
 const registerPageRoutes = (app, routes) => {
   routes.forEach(({ path: routePath, file, middleware = [] }) => {
-    app.get(routePath, ...middleware, (req, res) => {
+    const appliedMiddleware = dev_mode ? [] : middleware;
+
+    app.get(routePath, ...appliedMiddleware, (req, res) => {
       res.sendFile(htmlPath(file));
     });
   });
