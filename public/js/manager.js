@@ -17,20 +17,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // Function that runs when "Create Task" button is clicked
 function createTask() {
-    // Redirects the user to the "createtask.html" page
-    window.location.href = "createtask.html";
+    // Redirects the user to the "createTasks.html" page
+    window.location.href = "../html/managerPages/createTasks.html";
 }
 
 // Function that runs when "Edit Task" button is clicked
 function editTask() {
-    // Redirects the user to the "edittask.html" page
-    window.location.href = "edittask.html";
+    // Redirects the user to the "editTasks.html" page
+    window.location.href = "../html/managerPages/editTasks.html";
 }
 
 // Function that runs when "Task Overview" button is clicked
 function viewTaskOverview() {
-    // Redirects the user to the "taskoverview.html" page
-    window.location.href = "taskoverview.html";
+    // Redirects the user to the "taskOverview.html" page
+    window.location.href = "../html/managerPages/taskOverview.html";
 }
 
 // Select buttons from the HTML
