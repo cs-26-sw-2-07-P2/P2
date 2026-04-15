@@ -48,20 +48,20 @@ viewTeamOverviewbtn.addEventListener("click", viewTeamOverview);
 
 // Function that runs when the "Create Team" button is clicked
 function createTeam() {
-    // Redirects the browser to the "createteam.html" page
-    window.location.href = "createteam.html";
+    // Redirects the browser to the "createTeams.html" page
+    window.location.href = "../html/managerPages/createTeams.html";
 }
 
 // Function that runs when the "Edit Team" button is clicked
 function editTeam() {
-    // Redirects the browser to the "editteam.html" page
-    window.location.href = "editteam.html";
+    // Redirects the browser to the "editTeams.html" page
+    window.location.href = "../html/managerPages/editTeams.html";
 }
 
 // Function that runs when the "Team Overview" button is clicked
 function viewTeamOverview() {
-    // Redirects the browser to the "teamoverview.html" page
-    window.location.href = "teamoverview.html";
+    // Redirects the browser to the "teamOverview.html" page
+    window.location.href = "../html/managerPages/teamOverview.html";
 }
 
 
@@ -83,17 +83,17 @@ viewQuestionnaireAnswersBtn.addEventListener("click", viewQuestionnaireAnswers);
 // Function that runs when "Create Questionnaire" is clicked
 function createQuestionnaire() {
     // Redirects to the create questionnaire page
-    window.location.href = "createquestionnaire.html";
+    window.location.href = "../html/managerPages/createQuestionnaire.html";
 }
 
 // Function that runs when "Edit Questionnaire" is clicked
 function editQuestionnaire() {
     // Redirects to the edit questionnaire page
-    window.location.href = "questionnaire.html";
+    window.location.href = "../html/managerPages/editQuestionnaire.html";
 }
 
 // Function that runs when "View Questionnaire Answers" is clicked
 function viewQuestionnaireAnswers() {
     // Redirects to the questionnaire answers page
-    window.location.href = "questionnaireanswers.html";
+    window.location.href = "../html/managerPages/viewQuestionnaireAnswers.html";
 }
