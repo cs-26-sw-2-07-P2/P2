@@ -1,16 +1,20 @@
 
+import { logout } from "./logout.js"
 // Select the buttons from the HTML using their class names
 // NOTE: These class names should NOT contain spaces in real usage
-const createtaskbtn = document.querySelector(".createTask");
-const edittaskbtn = document.querySelector(".editTask");
-const viewtaskbtn = document.querySelector(".taskOverview");
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelector("#logout").addEventListener("click", logout);
 
-// Add click event listeners to each button
-// When the button is clicked, the corresponding function is executed
-createtaskbtn.addEventListener("click", createTask);
-edittaskbtn.addEventListener("click", editTask);
-viewtaskbtn.addEventListener("click", viewTaskOverview);
+    const createtaskbtn = document.querySelector(".createTask");
+    const edittaskbtn = document.querySelector(".editTask");
+    const viewtaskbtn = document.querySelector(".taskOverview");
 
+    createtaskbtn.addEventListener("click", createTask);
+    edittaskbtn.addEventListener("click", editTask);
+    viewtaskbtn.addEventListener("click", viewTaskOverview);
+
+    // same for all other buttons...
+});
 // Function that runs when "Create Task" button is clicked
 function createTask() {
     // Redirects the user to the "createtask.html" page
