@@ -92,8 +92,13 @@ button:hover {
   color: white;
 }
 
+/* push only selected item(s) to the right */
+.topnav .right {
+  margin-left: auto;
+}
+
 #logout {
-  position: absolute; 
-  right: 0; 
-  margin-right: 7px;
+  color: #f2f2f2;
+  padding: 14px 16px;
+  text-decoration: none;
 }

@@ -10,22 +10,22 @@ const NAVBAR_CONFIG = {
       { text: 'Home', href: '/employee' },
       { text: 'View Questionnaires', href: '/employee/questionnaires' },
       { text: 'View Your Team', href: '/employee/team' },
-      { text: 'Contact Us', href: '#contact' },
-      { text: 'About', href: '#about' },
+      { text: 'Contact Us', href: '#contact', position: 'right' },
+      { text: 'About', href: '#about', position: 'right' },
     ],
   },
   manager: {
     links: [
       { text: 'Home', href: '/manager' },
-      { text: 'Contact Us', href: '#contact' },
-      { text: 'About', href: '#about' },
+      { text: 'Contact Us', href: '#contact', position: 'right' },
+      { text: 'About', href: '#about', position: 'right' },
     ],
   },
   default: {
     links: [
       { text: 'Home', href: '#home' },
-      { text: 'Contact Us', href: '#contact' },
-      { text: 'About', href: '#about' },
+      { text: 'Contact Us', href: '#contact', position: 'right' },
+      { text: 'About', href: '#about', position: 'right' },
     ],
   },
 };
@@ -41,12 +41,17 @@ function createNavbar(role = 'default') {
   const navbar = document.createElement('div');
   navbar.className = 'topnav';
   
+  let firstRightFound = false;
   config.links.forEach((link, index) => {
     const anchor = document.createElement('a');
     anchor.href = link.href;
     anchor.textContent = link.text;
     if (index === 0) {
       anchor.classList.add('active');
+    }
+    if (link.position === 'right' && !firstRightFound) {
+      anchor.classList.add('right');
+      firstRightFound = true;
     }
     navbar.appendChild(anchor);
   });
