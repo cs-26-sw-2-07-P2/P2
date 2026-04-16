@@ -1,16 +1,22 @@
 'use strict'
 let amountOfQuestionnaires = 2;
-let insertedDiv;
+let insertedButton;
+function generateQuestionaire() {
+    window.location.pathname = "/employee/questionnaires/selected";
+    console.log("Clicked");
+}
 
-document.addEventListener('DOMContentLoaded', function() {
+//empQuestionnaire.html relevant
+if (window.location.pathname === "/employee/questionnaires"){
+    document.addEventListener('DOMContentLoaded', function() {
     for (let i = 0; i < amountOfQuestionnaires; i++) {
-        //create the div
-        insertedDiv = document.createElement("div");
-        //insert the div
-        document.getElementById("empContainerQuestionnaires").appendChild(insertedDiv);
+        //create the button
+        insertedButton = document.createElement("button");
+        //insert the button
+        document.getElementById("empContainerQuestionnaires").appendChild(insertedButton);
         //choose class and text content
-        insertedDiv.className = "empQuestionnaire";
-        insertedDiv.textContent = "QUESTIONNAIRE NAME ";
-        insertedDiv.textContent += (i);
+        insertedButton.className = "empQuestionnaire";
+        insertedButton.textContent = "Questionaire Name " + i;
+        insertedButton.addEventListener("click", generateQuestionaire);
     }
-})
+})}

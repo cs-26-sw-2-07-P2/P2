@@ -149,6 +149,9 @@ app.get("/employee", requireLogin, requireRole("employee"), (req, res) =>
 app.get("/employee/questionnaires", requireLogin, requireRole("employee"), (req, res) =>
   res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeQuestionnaires.html")),
 );
+app.get("/employee/questionnaires/selected", requireLogin, requireRole("employee"), (req, res) =>
+  res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeSelectedQuestionnaire.html")),
+);
 app.get("/manager", requireLogin, requireRole("manager"), (req, res) =>
   res.sendFile(path.join(__dirname, "../public/html/managerPages/manager.html")),
 );
