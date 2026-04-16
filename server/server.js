@@ -6,14 +6,17 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
+const dev_mode = true; // only for development
 
 app.use(express.json()); // Important for json formatting (Loginpage)
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
 
 // Serve all static files (CSS, JS, images)
 app.use(express.static(path.join(__dirname, "../public")));
@@ -25,8 +28,8 @@ app.get("/api/users", requireLogin, async (req, res) => {
       id: true,
       username: true,
       manager: true,
-      createdAt: true
-    }
+      createdAt: true,
+    },
   });
 
   res.json(users);
@@ -60,11 +63,10 @@ app.post("/login", async (req, res) => {
     };
 
     if (user.manager) {
-    res.json({ redirect: "/manager" });
+      res.json({ redirect: "/manager" });
     } else {
-    res.json({ redirect: "/employee" });
-  }
-
+      res.json({ redirect: "/employee" });
+    }
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
   }
@@ -102,7 +104,6 @@ app.post("/register", async (req, res) => {
     });
 
     res.json({ success: true, userId: user.id });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Registration failed" });
@@ -137,26 +138,49 @@ function requireRole(role) {
 }
 
 // Routing
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/html/index.html"));
-});
-app.get("/register", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/html/register.html"));
-});
-app.get("/employee", requireLogin, requireRole("employee"), (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/html/employeePages/employee.html")),
-);
-app.get("/employee/questionnaires", requireLogin, requireRole("employee"), (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeQuestionnaires.html")),
-);
-app.get("/employee/questionnaires/selected", requireLogin, requireRole("employee"), (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/html/employeePages/employeeSelectedQuestionnaire.html")),
-);
-app.get("/manager", requireLogin, requireRole("manager"), (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/html/managerPages/manager.html")),
-);
-app.get("/manager/questionnaire", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public/html/managerPages/questionnaire.html"))
-)
+const htmlPath = (file) => path.join(__dirname, "../public/html", file);
+const routes = [
+  {
+    path: "/",
+    file: "index.html",
+  },
+  {
+    path: "/register",
+    file: "register.html",
+  },
+  {
+    path: "/employee",
+    file: "employeePages/employee.html",
+    middleware: [requireLogin, requireRole("employee")],
+  },
+  {
+    path: "/employee/questionnaires",
+    file: "employeePages/employeeQuestionnaires.html",
+    middleware: [requireLogin, requireRole("employee")],
+  },
+  {
+    path: "/manager",
+    file: "managerPages/manager.html",
+    middleware: [requireLogin, requireRole("manager")],
+  },
+  {
+    path: "/manager/questionnaire",
+    file: "managerPages/questionnaire.html",
+    middleware: [requireLogin, requireRole("manager")],
+  },
+];
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const registerPageRoutes = (app, routes) => {
+  routes.forEach(({ path: routePath, file, middleware = [] }) => {
+    const appliedMiddleware = dev_mode ? [] : middleware;
+
+    app.get(routePath, ...appliedMiddleware, (req, res) => {
+      res.sendFile(htmlPath(file));
+    });
+  });
+};
+registerPageRoutes(app, routes);
+
+app.listen(PORT, () =>
+  console.log(`Server running on http://localhost:${PORT}`),
+);
