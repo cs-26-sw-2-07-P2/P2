@@ -121,7 +121,7 @@ app.post("/sendQuestionnaire", async (req, res) => {
     });
     res.json({ success: true, questionnaireCreated: questionnaire.createdAt })
   } catch (error) {
-    
+    res.status(500).json({ error: "Failed to send Questionnaire" });
   }
 
 })

@@ -11,6 +11,38 @@ model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   password  String
-  manager   Boolean  @default(false)
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
+
+  employee  Employee?
+}
+
+model Employee {
+  id         Int   @id @default(autoincrement())
+  userId     Int   @unique
+  user       User  @relation(fields: [userId], references: [id])
+
+  experience Int
+
+  teamId     Int?
+  team       Team? @relation(fields: [teamId], references: [id])
+
+  responses  Response[]
+}
+ 
+model Questionaire {
+  question  String
+  answer    Int/String
+}
+
+model Team {
+  id        Int        @id @default(autoincrement())
+  name      String
+
+  employees Employee[]
+}
+
+enum Role {
+  USER
+  MANAGER
 }
