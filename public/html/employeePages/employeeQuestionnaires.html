@@ -6,14 +6,17 @@
     <title>Document</title>
     <link rel="stylesheet" href="../../style/style.css">
     <script src="../../js/components/navbar.js"></script>
+    <script src="../../js/employeeQuestionnaires.js"></script>
 </head>
-<body>
+<body style="flex-direction: column; align-items: center; display: flex;">
     <script>replaceNavbar('employee');</script>
     <h1>Answer Questionnaires</h1>
     <!-- display array of questionaires -->
     <div id="empContainerQuestionnaires">
-    <button id="employeeQuestionnaires" class="empQuestionnaire" style="display: none;"></button></div>
- 
+    <button id="employeeQuestionnaires" class="empQuestionnaire" 
+    style="display: none;" 
+    onclick="window.location.href='/employee/questionnaires/selected'">noah</button>
+    </div>
 
 </body>
 </html>

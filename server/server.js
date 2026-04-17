@@ -159,6 +159,11 @@ const routes = [
     middleware: [requireLogin, requireRole("employee")],
   },
   {
+    path: "/employee/questionnaires/selected",
+    file: "employeePages/employeeSelectedQuestionnaire.html",
+    middleware: [requireLogin, requireRole("employee")],
+  },
+  {
     path: "/manager",
     file: "managerPages/manager.html",
     middleware: [requireLogin, requireRole("manager")],
