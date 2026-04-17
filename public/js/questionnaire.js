@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Manager Side
 document.querySelector("#addRow").addEventListener("click", addRow);
-document.querySelector("#saveQuestionnaire").addEventListener("click", saveQuestionnaire);
+document.querySelector("#saveQuestionnaire").addEventListener("click", sendQuestionnaire);
 document.querySelector("#loadSavedQuestionnaire").addEventListener("click", loadSavedQuestionnaire);
 document.querySelector("#clearQuestionnaire").addEventListener("click", clearQuestionnaire);
 
@@ -71,8 +71,7 @@ function loadSavedQuestionnaire(){
     }
 }
 
-
-function saveQuestionnaire(){
+async function sendQuestionnaire(){
     const table = document.getElementById("questionnaire");
     const rows = table.rows;
     const data = [];
@@ -84,9 +83,25 @@ function saveQuestionnaire(){
         data.push({question, team})
     }
 
+    try {
+        const response = await fetch("/sendQuestionnaire", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data }),
+    });
     
-    console.log(data);
+        const data = await response.json();
 
+    if (response.ok) {
+      console.log("Sent Questionnaire!");
+    } else {
+      console.log(data.error || "Failed to send questionnaire!");
+    }
+    } catch (error) {
+        console.log("Error:", error);
+    }
 }
 
 function addRow(){

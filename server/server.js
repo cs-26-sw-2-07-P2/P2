@@ -110,6 +110,22 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.post("/sendQuestionnaire", async (req, res) => {
+  const { data } = req.body;
+
+  try {
+    const questionnaire = await prisma.questionnaire.create({
+      data: {
+        data
+      }
+    });
+    res.json({ success: true, questionnaireCreated: questionnaire.createdAt })
+  } catch (error) {
+    
+  }
+
+})
+
 // requireLogin for session based routing
 function requireLogin(req, res, next) {
   if (!req.session.user) {
