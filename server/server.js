@@ -110,21 +110,49 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/sendQuestionnaire", async (req, res) => {
-  const { data } = req.body;
+// Creates sent questionnaires in DB
+app.post("/api/questionnaires", async (req, res) => {
+  const { title, questions } = req.body;
+
+  if (!title) {
+  return res.status(400).json({ error: "Title is required" });
+}
 
   try {
     const questionnaire = await prisma.questionnaire.create({
       data: {
-        data
+        title,
+        questions: {
+          create: questions
+            .filter(q => q.text?.trim()) // q is used as a temporary object to handle the text
+            .map(q => ({
+              text: q.text.trim()
+            }))
+        }
+      },
+      include: {
+        questions: true
       }
     });
-    res.json({ success: true, questionnaireCreated: questionnaire.createdAt })
+    res.json({ success: true, questionnaire });
   } catch (error) {
     res.status(500).json({ error: "Failed to send Questionnaire" });
   }
+});
 
-})
+// Allow you to get the questionnaires
+app.get("/api/questionnaires", async(req, res) => {
+  try {
+    const questionnaires = await prisma.questionnaire.findMany({
+      include: {
+        questions: true
+      }
+    });
+    res.json({ success: true, questionnaires });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch" });
+  }
+});
 
 // requireLogin for session based routing
 function requireLogin(req, res, next) {
@@ -154,7 +182,6 @@ function requireRole(role) {
 }
 
 // Routing
-const htmlPath = (file) => path.join(__dirname, "../public/html", file);
 const routes = [
   {
     path: "/",
@@ -166,31 +193,17 @@ const routes = [
   },
   {
     path: "/employee",
-    file: "employeePages/employee.html",
-    middleware: [requireLogin, requireRole("employee")],
-  },
-  {
-    path: "/employee/questionnaires",
-    file: "employeePages/employeeQuestionnaires.html",
+    file: "/employee.html",
     middleware: [requireLogin, requireRole("employee")],
   },
   {
     path: "/manager",
-    file: "managerPages/manager.html",
-    middleware: [requireLogin, requireRole("manager")],
-  },
-  {
-    path: "/manager/questionnaire",
-    file: "managerPages/createQuestionnaire.html",
-    middleware: [requireLogin, requireRole("manager")],
-  },
-  {
-    path: "/manager/createteams",
-    file:"managerPages/createTeams.html",
+    file: "/manager.html",
     middleware: [requireLogin, requireRole("manager")],
   }
 ];
 
+const htmlPath = (file) => path.join(__dirname, "../public/html", file);
 const registerPageRoutes = (app, routes) => {
   routes.forEach(({ path: routePath, file, middleware = [] }) => {
     const appliedMiddleware = dev_mode ? [] : middleware;

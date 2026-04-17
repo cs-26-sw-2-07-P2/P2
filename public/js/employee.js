@@ -1,31 +1,66 @@
-import { logout } from "./logout.js";
-//NOTICE-------------------------- THESE 2 VARIABLES SHOULD BE CHANGED IN REGARDS TO HOW MANY TASKS THERE ARE, 3 AND 7 ARE PLACEHOLDERS
-let amountOfOngoingTasks = 3;
-let amountOfCompletedTasks = 7;
+import { renderNavbar } from "./components/NavBar.js";
+import { logout } from "./components/logout.js";
 
-let completedTasks;
+let app;
+let navbarContainer;
 
-//run code only after page load
 document.addEventListener("DOMContentLoaded", () => {
-  // logout functionality
-  document.querySelector("#logout").addEventListener("click", logout);
-  //for loop to generate completedtask boxes (divs)
-  for (let i = 0; i < amountOfCompletedTasks; i++) {
-    //create the div
-    completedTasks = document.createElement("div");
-    //insert the div
-    document.getElementById("containerCompleted").appendChild(completedTasks);
-    //choose class and text content
-    completedTasks.className = "boxCompleted";
-    completedTasks.textContent = "Completed task number ";
-    completedTasks.textContent += i;
-  }
-  //same loop but for ongoing tasks:
-  for (let i = 0; i < amountOfOngoingTasks; i++) {
-    completedTasks = document.createElement("div");
-    document.getElementById("containerOngoing").appendChild(completedTasks);
-    completedTasks.className = "boxOngoing";
-    completedTasks.textContent = "Ongoing task number ";
-    completedTasks.textContent += i;
-  }
+  app = document.getElementById("app");
+  navbarContainer = document.getElementById("navbar");
+
+  const navbar = renderNavbar("manager", navigate);
+  navbarContainer.appendChild(navbar);
+
+  document.addEventListener("click", (e) => {
+    if (e.target.id === "logout") logout();
+  });
+
+  navigate("home");
 });
+
+function navigate(route) {
+  render(route);
+}
+
+function render(route) {
+  switch (route) {
+    case "home":
+      app.innerHTML = `
+        <h1>Welcome employee</h1>
+        <div id="containerOngoing"></div>
+        <div id="containerCompleted"></div>
+      `;
+      renderTasks();
+      break;
+
+    case "questionnaires":
+      app.innerHTML = `<h1>Questionnaires</h1>`;
+      break;
+
+    case "team":
+      app.innerHTML = `<h1>Your Team</h1>`;
+      break;
+
+    default: // if no route found
+      app.innerHTML = `<h1>404</h1>`;
+  }
+}
+
+function renderTasks() {
+  const ongoing = document.getElementById("containerOngoing");
+  const completed = document.getElementById("containerCompleted");
+
+  for (let i = 0; i < 3; i++) {
+    const div = document.createElement("div");
+    div.className = "boxOngoing";
+    div.textContent = "Task " + i;
+    ongoing.appendChild(div);
+  }
+
+  for (let i = 0; i < 7; i++) {
+    const div = document.createElement("div");
+    div.className = "boxCompleted";
+    div.textContent = "Completed " + i;
+    completed.appendChild(div);
+  }
+}

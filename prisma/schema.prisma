@@ -22,17 +22,10 @@ model Employee {
   userId     Int   @unique
   user       User  @relation(fields: [userId], references: [id])
 
-  experience Int
-
   teamId     Int?
   team       Team? @relation(fields: [teamId], references: [id])
 
   responses  Response[]
-}
- 
-model Questionaire {
-  question  String
-  answer    Int/String
 }
 
 model Team {
@@ -40,6 +33,37 @@ model Team {
   name      String
 
   employees Employee[]
+}
+
+// QUESTIONNAIRE SYSTEM
+model Questionnaire {
+  id        Int        @id @default(autoincrement())
+  title     String
+  createdAt DateTime   @default(now())
+
+  questions Question[]
+}
+
+model Question {
+  id              Int           @id @default(autoincrement())
+  text            String
+
+  questionnaireId Int
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+
+  responses       Response[]
+}
+
+model Response {
+  id          Int      @id @default(autoincrement())
+
+  answer      String   // keep simple for now
+
+  questionId  Int
+  question    Question @relation(fields: [questionId], references: [id])
+
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
 }
 
 enum Role {
