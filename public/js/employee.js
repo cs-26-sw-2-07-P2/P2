@@ -27,22 +27,37 @@ function render(route) {
     case "home":
       app.innerHTML = `
         <h1>Welcome employee</h1>
+        <p>This is your employee dashboard where you can view your tasks, team and questionnaires.</p>
+        <p>Use the navigation bar above to access different sections of the dashboard.</p>
+
+        <h3>On this page you can see an overview of your current tasks:</h3>
         <div id="containerOngoing"></div>
-        <div id="containerCompleted"></div>
       `;
       renderTasks();
       break;
 
     case "tasks":
-      app.innerHTML = `<h1>Your Tasks</h1>`;
+      app.innerHTML = `<h1>Your Tasks</h1>
+      <p>Here you can view your tasks.</p>
+      <p>Ongoing tasks are shown in green, completed tasks are shown in grey.</p>
+      <div id="containerOngoing"></div>
+      <div id="containerCompleted"></div>
+      `;
+      renderTasks();
       break;
 
     case "teams":
-      app.innerHTML = `<h1>Your Team</h1>`;
+      app.innerHTML = `<h1>Your Team</h1>
+      <p>Here you can view your assigned team.</p>
+      <h4>The members of your team are shown below:</h4>
+      <div id="containerTeam"></div>
+      `;
+      renderTeam();
       break;
 
     case "questionnaires":
-      app.innerHTML = `<h1>Questionnaires</h1>`;
+      app.innerHTML = `<h1>Questionnaires</h1>
+      <p>Here you can view and fill out your questionnaires.</p>`;
       break;
 
     default: // if no route found
@@ -54,7 +69,7 @@ function renderTasks() {
   const ongoing = document.getElementById("containerOngoing");
   const completed = document.getElementById("containerCompleted");
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     const div = document.createElement("div");
     div.className = "boxOngoing";
     div.textContent = "Task " + i;
@@ -66,5 +81,16 @@ function renderTasks() {
     div.className = "boxCompleted";
     div.textContent = "Completed " + i;
     completed.appendChild(div);
+  }
+}
+
+function renderTeam() {
+  const teamContainer = document.getElementById("containerTeam");
+
+  for (let i = 1; i < 6; i++) {
+    const div = document.createElement("div");
+    div.className = "boxTeam";
+    div.textContent = "Team Member " + i;
+    teamContainer.appendChild(div);
   }
 }
