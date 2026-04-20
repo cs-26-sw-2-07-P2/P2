@@ -49,8 +49,7 @@ function render(route) {
     case "teams":
       app.innerHTML = `<h1>Your Team</h1>
       <p>Here you can view your assigned team.</p>
-      <h3>The members of your team are shown below:</h3>
-      <h4>Team AAA</h4>
+      <h4>Teamname: Team AAA</h4>
       <div id="containerTeam"></div>
       `;
       renderTeam();
