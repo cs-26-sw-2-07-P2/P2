@@ -33,12 +33,16 @@ function render(route) {
       renderTasks();
       break;
 
-    case "questionnaires":
-      app.innerHTML = `<h1>Questionnaires</h1>`;
+    case "tasks":
+      app.innerHTML = `<h1>Your Tasks</h1>`;
       break;
 
-    case "team":
+    case "teams":
       app.innerHTML = `<h1>Your Team</h1>`;
+      break;
+
+    case "questionnaires":
+      app.innerHTML = `<h1>Questionnaires</h1>`;
       break;
 
     default: // if no route found
