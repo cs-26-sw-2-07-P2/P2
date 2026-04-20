@@ -26,7 +26,9 @@ function navigate(route) {
 function render(route) {
   switch (route) {
     case "home":
-      app.innerHTML = `<h1>Manager Dashboard</h1>`;
+      app.innerHTML = `<h1>Welcome USERNAME</h1>
+      <p>Welcome to your manager dashboard. Here you can manage your tasks, teams and questionnaires.</p>
+      <p>Use the navigation bar above to access different sections of the dashboard.</p>`;
       break;
 
     case "tasks":
@@ -49,11 +51,13 @@ function render(route) {
 function renderTasks() {
   app.innerHTML = `
     <h1>Task Management</h1>
-    <p>Here you can manage tasks.</p>
+    <p>Here you are able to manage tasks and assign them to Teams.</p>
+    <p>Use the buttons below to create, edit and view tasks.</p>
 
     <button id="createTask">Create New Task</button>
     <button id="editTask">Edit Existing Tasks</button>
     <button id="viewTask">Task Overview</button>
+    <button id="viewCompletedTasks">View Completed Tasks</button>
   `;
 
   document.getElementById("createTask").onclick = () => {
@@ -72,7 +76,9 @@ function renderTasks() {
 function renderTeams() {
   app.innerHTML = `
     <h1>Team Management</h1>
-    <p>Manage your teams here.</p>
+    <p>Here you are able to manage your teams.</p>
+    <p>Use the buttons below to create, edit and view teams.</p>
+    <p>These teams will be assigned tasks to complete, through the 'Tasks' tab.</p>
 
     <button id="createTeam">Create New Team</button>
     <button id="editTeam">Edit Teams</button>

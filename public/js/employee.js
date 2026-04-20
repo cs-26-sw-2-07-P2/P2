@@ -26,7 +26,7 @@ function render(route) {
   switch (route) {
     case "home":
       app.innerHTML = `
-        <h1>Welcome employee</h1>
+        <h1>Welcome USERNAME</h1>
         <p>This is your employee dashboard where you can view your tasks, team and questionnaires.</p>
         <p>Use the navigation bar above to access different sections of the dashboard.</p>
 
@@ -49,7 +49,8 @@ function render(route) {
     case "teams":
       app.innerHTML = `<h1>Your Team</h1>
       <p>Here you can view your assigned team.</p>
-      <h4>The members of your team are shown below:</h4>
+      <h3>The members of your team are shown below:</h3>
+      <h4>Team AAA</h4>
       <div id="containerTeam"></div>
       `;
       renderTeam();
