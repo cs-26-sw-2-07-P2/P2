@@ -1,3 +1,45 @@
+document.addEventListener("DOMContentLoaded", () => {
+  let app = document.getElementById("app");
+  renderLoginPage(app);
+});
+
+function renderLoginPage(container) { 
+    container.innerHTML = 
+    `<div id="loginBody">
+    <form id="loginForm">
+      <h2>Login</h2>
+      <label for="username"><b>Username</b></label>
+      <input
+        id="username"
+        type="text"
+        placeholder="Enter Username"
+        name="username"
+        required
+      />
+
+      <label for="password"><b>Password</b></label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter Password"
+        name="password"
+        required
+      />
+
+      <button type="submit">Login</button>
+      <button id="registerButton" type="button">Register</button>
+      <label>
+        <input type="checkbox" checked="checked" name="remember" /> Remember me?
+      </label>
+    </form>
+    </div>`;
+
+  document.getElementById("registerButton").addEventListener("click", () => {
+  window.location.href = "/register";
+  });
+};
+
+document.addEventListener("DOMContentLoaded", () =>
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -28,4 +70,4 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   } catch (error) {
     console.error("Error:", error);
   }
-});
+}));
