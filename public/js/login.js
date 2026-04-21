@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderLoginPage(app);
 });
 
-function renderLoginPage(container) {
+function renderLoginPage(container) { 
     container.innerHTML = 
     `<div id="loginBody">
     <form id="loginForm">
@@ -39,6 +39,7 @@ function renderLoginPage(container) {
   });
 };
 
+document.addEventListener("DOMContentLoaded", () =>
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -69,4 +70,4 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   } catch (error) {
     console.error("Error:", error);
   }
-});
+}));
