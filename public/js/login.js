@@ -70,6 +70,3 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     console.error("Error:", error);
   }
 });
-document.getElementById("registerButton").addEventListener("click", () => {
-  window.location.href = "/register";
-});
