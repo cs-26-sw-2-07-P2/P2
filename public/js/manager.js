@@ -1,98 +1,99 @@
-import { logout } from "./logout.js";
-// Select the buttons from the HTML using their class names
-// NOTE: These class names should NOT contain spaces in real usage
+import { renderNavbar } from "./components/navbar.js";
+import { renderQuestionnairePage } from "./questionnaire.js";
+import { logout } from "./components/logout.js";
+
+let app;
+let navbarContainer;
+
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelector("#logout").addEventListener("click", logout);
+  app = document.getElementById("app");
+  navbarContainer = document.getElementById("navbar");
 
-  const createtaskbtn = document.querySelector(".createTask");
-  const edittaskbtn = document.querySelector(".editTask");
-  const viewtaskbtn = document.querySelector(".taskOverview");
+  const navbar = renderNavbar("manager", navigate);
+  navbarContainer.appendChild(navbar);
 
-  createtaskbtn.addEventListener("click", createTask);
-  edittaskbtn.addEventListener("click", editTask);
-  viewtaskbtn.addEventListener("click", viewTaskOverview);
+  document.addEventListener("click", (e) => {
+    if (e.target.id === "logout") logout();
+  });
 
-  // same for all other buttons...
+  navigate("home");
 });
-// Function that runs when "Create Task" button is clicked
-function createTask() {
-  // Redirects the user to the "createTasks.html" page
-  window.location.href = "../html/managerPages/createTasks.html";
+
+function navigate(route) {
+  render(route);
 }
 
-// Function that runs when "Edit Task" button is clicked
-function editTask() {
-  // Redirects the user to the "editTasks.html" page
-  window.location.href = "../html/managerPages/editTasks.html";
+function render(route) {
+  switch (route) {
+    case "home":
+      app.innerHTML = `<h1>Welcome USERNAME</h1>
+      <p>Welcome to your manager dashboard. Here you can manage your tasks, teams and questionnaires.</p>
+      <p>Use the navigation bar above to access different sections of the dashboard.</p>`;
+      break;
+
+    case "tasks":
+      renderTasks();
+      break;
+
+    case "teams":
+      renderTeams();
+      break;
+
+    case "questionnaires":
+      renderQuestionnairePage(app);
+      break;
+
+    default: // if no route found
+      app.innerHTML = `<h1>404</h1>`;
+  }
 }
 
-// Function that runs when "Task Overview" button is clicked
-function viewTaskOverview() {
-  // Redirects the user to the "taskOverview.html" page
-  window.location.href = "../html/managerPages/taskOverview.html";
+function renderTasks() {
+  app.innerHTML = `
+    <h1>Task Management</h1>
+    <p>Here you are able to manage tasks and assign them to Teams.</p>
+    <p>Use the buttons below to create, edit and view tasks.</p>
+
+    <button id="createTask">Create New Task</button>
+    <button id="editTask">Edit Existing Tasks</button>
+    <button id="viewTask">Task Overview</button>
+    <button id="viewCompletedTasks">View Completed Tasks</button>
+  `;
+
+  document.getElementById("createTask").onclick = () => {
+    console.log("Create Task");
+  };
+
+  document.getElementById("editTask").onclick = () => {
+    console.log("Edit Task");
+  };
+
+  document.getElementById("viewTask").onclick = () => {
+    console.log("View Tasks");
+  };
 }
 
-// Select buttons from the HTML
-// NOTE: querySelector expects a CSS selector (like .class or #id)
-// Right now these are written as plain text, so they will NOT work unless fixed
-const createTeambtn = document.querySelector(".createTeam");
-const editTeambtn = document.querySelector(".editTeam");
-const viewTeamOverviewbtn = document.querySelector(".teamOverview");
+function renderTeams() {
+  app.innerHTML = `
+    <h1>Team Management</h1>
+    <p>Here you are able to manage your teams.</p>
+    <p>Use the buttons below to create, edit and view teams.</p>
+    <p>These teams will be assigned tasks to complete, through the 'Tasks' tab.</p>
 
-// Add click event listeners to each button
-// When a button is clicked, it runs the corresponding function
-createTeambtn.addEventListener("click", createTeam);
-editTeambtn.addEventListener("click", editTeam);
-viewTeamOverviewbtn.addEventListener("click", viewTeamOverview);
+    <button id="createTeam">Create New Team</button>
+    <button id="editTeam">Edit Teams</button>
+    <button id="viewTeams">Team Overview</button>
+  `;
 
-// Function that runs when the "Create Team" button is clicked
-function createTeam() {
-  // Redirects the browser to the "createTeams.html" page
-  window.location.href = "../html/managerPages/createTeams.html";
-}
+  document.getElementById("createTeam").onclick = () => {
+    console.log("Create Team");
+  };
 
-// Function that runs when the "Edit Team" button is clicked
-function editTeam() {
-  // Redirects the browser to the "editTeams.html" page
-  window.location.href = "../html/managerPages/editTeams.html";
-}
+  document.getElementById("editTeam").onclick = () => {
+    console.log("Edit Team");
+  };
 
-// Function that runs when the "Team Overview" button is clicked
-function viewTeamOverview() {
-  // Redirects the browser to the "teamOverview.html" page
-  window.location.href = "../html/managerPages/teamOverview.html";
-}
-
-// ---------------- QUESTIONNAIRE SECTION ----------------
-
-// Select questionnaire-related buttons from the HTML
-// Again, these selectors are incorrect because they are not valid CSS selectors
-const createQuestionnaireBtn = document.querySelector(".createQuestionnaire");
-const editQuestionnaireBtn = document.querySelector(".editQuestionnaire");
-const viewQuestionnaireAnswersBtn = document.querySelector(
-  ".viewQuestionnaireAnswers",
-);
-
-// Add click event listeners to questionnaire buttons
-// Each button triggers a different function when clicked
-createQuestionnaireBtn.addEventListener("click", createQuestionnaire);
-editQuestionnaireBtn.addEventListener("click", editQuestionnaire);
-viewQuestionnaireAnswersBtn.addEventListener("click", viewQuestionnaireAnswers);
-
-// Function that runs when "Create Questionnaire" is clicked
-function createQuestionnaire() {
-  // Redirects to the create questionnaire page
-  window.location.href = "../html/managerPages/createQuestionnaire.html";
-}
-
-// Function that runs when "Edit Questionnaire" is clicked
-function editQuestionnaire() {
-  // Redirects to the edit questionnaire page
-  window.location.href = "../html/managerPages/editQuestionnaire.html";
-}
-
-// Function that runs when "View Questionnaire Answers" is clicked
-function viewQuestionnaireAnswers() {
-  // Redirects to the questionnaire answers page
-  window.location.href = "../html/managerPages/viewQuestionnaireAnswers.html";
+  document.getElementById("viewTeams").onclick = () => {
+    console.log("View Teams");
+  };
 }

@@ -11,6 +11,62 @@ model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   password  String
-  manager   Boolean  @default(false)
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
+
+  employee  Employee?
+}
+
+model Employee {
+  id         Int   @id @default(autoincrement())
+  userId     Int   @unique
+  user       User  @relation(fields: [userId], references: [id])
+
+  teamId     Int?
+  team       Team? @relation(fields: [teamId], references: [id])
+
+  responses  Response[]
+}
+
+model Team {
+  id        Int        @id @default(autoincrement())
+  name      String
+
+  employees Employee[]
+}
+
+// QUESTIONNAIRE SYSTEM
+model Questionnaire {
+  id        Int        @id @default(autoincrement())
+  title     String
+  createdAt DateTime   @default(now())
+
+  questions Question[]
+}
+
+model Question {
+  id              Int           @id @default(autoincrement())
+  text            String
+
+  questionnaireId Int
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+
+  responses       Response[]
+}
+
+model Response {
+  id          Int      @id @default(autoincrement())
+
+  answer      String   // keep simple for now
+
+  questionId  Int
+  question    Question @relation(fields: [questionId], references: [id])
+
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
+}
+
+enum Role {
+  USER
+  MANAGER
 }

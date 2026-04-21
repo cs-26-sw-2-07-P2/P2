@@ -1,109 +1,165 @@
-'use strict'
-let amountOfQuestionnaires = 2;
-let insertedDiv;
-
-document.addEventListener('DOMContentLoaded', function() {
-    for (let i = 0; i < amountOfQuestionnaires; i++) {
-        //create the div
-        insertedDiv = document.createElement("div");
-        //insert the div
-        document.getElementById("empContainerQuestionnaires").appendChild(insertedDiv);
-        //choose class and text content
-        insertedDiv.className = "empQuestionnaire";
-        insertedDiv.textContent = "QUESTIONNAIRE NAME ";
-        insertedDiv.textContent += (i);
-    }
-})
-
-
-
-// Manager Side
-document.querySelector("#addRow").addEventListener("click", addRow);
-document.querySelector("#saveQuestionnaire").addEventListener("click", saveQuestionnaire);
-document.querySelector("#loadSavedQuestionnaire").addEventListener("click", loadSavedQuestionnaire);
-document.querySelector("#clearQuestionnaire").addEventListener("click", clearQuestionnaire);
-
-// Syntetisk data der kan slettes senere
-const savedData = [
-    { question: "How are your backend skills?", team: "AAA" },
-    { question: "How are your frontend skills?", team: "BBB" }
+// How data / questionnaires will look:
+/*
+const Data = [
+  {
+    id: 1,
+    title: "Frontend questionnaire",
+    questions: [
+      { text: "How are your frontend skills?" },
+      { text: "How comfortable are you with React?" }
+    ]
+  },
+  {
+    id: 2,
+    title: "Backend questionnaire",
+    questions: [
+      { text: "How are your backend skills?" },
+      { text: "Do you understand Prisma?" }
+    ]
+  }
 ];
+*/
 
-// Laver drop-down menu
-function addDropDownOptions(selectedTeam){
-    // Laver nyt array med kun teams ud fra større 'questions' og 'teams' array.
-    const teamNames = savedData.map(data => data.team)
+// Questionnaire page
+export function renderQuestionnairePage(container) {
+  container.innerHTML = `
+    <h1>Questionnaire</h1>
 
-    let teamNamesSet = new Set(teamNames);
-    let teamNamesSetArray = [...teamNamesSet];
+    <button id="addRow">Add Question</button>
+    <button id="saveQuestionnaire">Save</button>
+    <button id="loadSavedQuestionnaire">Load</button>
+    <button id="clearQuestionnaire">Clear</button>
+    <br></br>
+    <input id="questionnaireTitle" placeholder="Enter questionnaire title" />
+    <table id="questionnaire">
+      <tr>
+        <th>Question</th>
+        <th>Team</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  `;
 
-    // laver først nyt array af html-options for hvert team og derefter samler det i en string
-    return teamNamesSetArray.map(team =>
-        `<option value="${team}" ${team === selectedTeam ? "selected" : ""}>${team}</option>`
-    ).join("");
+  // Attaching events AFTERd render
+  document.getElementById("addRow").onclick = addRow;
+  document.getElementById("saveQuestionnaire").onclick = sendQuestionnaire;
+  document.getElementById("loadSavedQuestionnaire").onclick = loadSavedQuestionnaire;
+  document.getElementById("clearQuestionnaire").onclick = clearQuestionnaire;
 }
 
+//
+// Helper functions
+//
+function addDropDownOptions(selected = "") {
+  const teams = ["AAA", "BBB", "CCC"]; // temporary static values
 
-function clearQuestionnaire(){
-    const table = document.getElementById("questionnaire");
-    const rows = table.rows;
-    for (let i = rows.length - 1; i > 0; i--){
-        table.deleteRow(i);
+  return teams.map(team =>
+    `<option value="${team}" ${team === selected ? "selected" : ""}>${team}</option>`
+  ).join("");
+}
+
+function clearQuestionnaire() {
+  const table = document.getElementById("questionnaire");
+  while (table.rows.length > 1) {
+    table.deleteRow(1);
+  }
+}
+
+function addRow() {
+  const table = document.getElementById("questionnaire");
+
+  const row = table.insertRow(-1);
+
+  row.innerHTML = `
+    <td><input type="text" placeholder="Enter question"></td>
+    <td><select>${addDropDownOptions("")}</select></td>
+    <td><button class="deleteRow">Delete</button></td>
+  `;
+
+  row.querySelector(".deleteRow").onclick = () => row.remove();
+}
+
+// Sends answered questionnaire to DB
+async function sendQuestionnaire() {
+  const table = document.getElementById("questionnaire");
+  const title = document.getElementById("questionnaireTitle").value;
+  const questions = [];
+
+  if (!title.trim()) {
+  alert("Please enter a questionnaire title");
+  return;
+}
+
+  for (let i = 1; i < table.rows.length; i++) {
+    const text = table.rows[i].cells[0].querySelector("input").value;
+    if (text.trim() !== "") {
+      questions.push({ text });
     }
+  }
+
+  const payload = {
+    title: title, // later: add name of the questionnaire
+    questions
+  };
+
+  try {
+    const response = await fetch("/api/questionnaires", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      console.log("Created!", result);
+      alert("Saved!");
+    } else {
+      console.log(result.error);
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-function loadSavedQuestionnaire(){
+// Loads send questionnaire -> at them moment from savedData but its wrong format and things
+async function loadSavedQuestionnaire() {
+  clearQuestionnaire();
+
+  try {
+    const response = await fetch("/api/questionnaires");
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.log(result.error);
+      return;
+    }
+
     const table = document.getElementById("questionnaire");
 
-    clearQuestionnaire();
+    result.questionnaires.forEach(q => {
+      // Title row
+      const titleRow = table.insertRow(-1);
+      titleRow.innerHTML = `
+        <td colspan="3"><strong>${q.title}</strong></td>
+      `;
+      // Questions
+      q.questions.forEach(item => {
+        const row = table.insertRow(-1);
 
-    for (let i = 0; i < savedData.length; i++){
-        const newRow = table.insertRow(-1);
-        newRow.innerHTML = 
-        `<tr>
-            <td><input type="text" value="${savedData[i].question}"></input></td>
-            <td>
-                <select>${addDropDownOptions(savedData[i].team)}</select>
-                <td><button onclick="deleteRow(this)">Delete This Question...</button></td>
-            </td>
-        </tr>`
-        ;
-    }
+        row.innerHTML = `
+          <td><input type="text" value="${item.text}"></td>
+          <td><select>${addDropDownOptions("")}</select></td>
+          <td><button class="deleteRow">Delete</button></td>
+        `;
+
+        row.querySelector(".deleteRow").onclick = () => row.remove();
+      });
+    });
+    alert("Loaded questionnaires!")
+  } catch (err) {
+    console.error(err);
+  }
 }
-
-
-function saveQuestionnaire(){
-    const table = document.getElementById("questionnaire");
-    const rows = table.rows;
-    const data = [];
-
-    for (let i  = 1; i < rows.length; i++){
-        const question = rows[i].cells[0].querySelector("input").value;
-        const team = rows[i].cells[1].querySelector("select").value;
-
-        data.push({question, team})
-    }
-
-    
-    console.log(data);
-
-}
-
-function addRow(){
-    const table = document.getElementById("questionnaire");
-    const newRow = table.insertRow(-1);
-    newRow.innerHTML = 
-            `<tr>
-                <td><input type="text" placeholder="Enter Question"></input></td>
-                <td>
-                    <select>${addDropDownOptions("")}</select>
-                    <td><button onclick="deleteRow(this)">Delete This Question...</button></td>
-                </td>
-            </tr>`
-            ;
-    }
-function deleteRow(btn){
-    const row = btn.closest("tr");
-    row.parentElement.deleteRow(row.rowIndex);
-}
-
