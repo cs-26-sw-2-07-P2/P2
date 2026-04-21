@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", (e) => {
     if (e.target.id === "logout") logout();
   });
-
+  insertedButton.addEventListener("click", generateQuestionaire);
   navigate("home");
 });
 
@@ -31,7 +31,7 @@ function render(route) {
         <p>Use the navigation bar above to access different sections of the dashboard.</p>
 
         <h3>On this page you can see an overview of your current tasks:</h3>
-        <div id="containerOngoing"></div>
+        <div id="containerOngoing" class="alignItems"></div>
       `;
       renderTasks();
       break;
@@ -40,8 +40,8 @@ function render(route) {
       app.innerHTML = `<h1>Your Tasks</h1>
       <p>Here you can view your tasks.</p>
       <p>Ongoing tasks are shown in green, completed tasks are shown in grey.</p>
-      <div id="containerOngoing"></div>
-      <div id="containerCompleted"></div>
+      <div id="containerOngoing" class="alignItems"></div>
+      <div id="containerCompleted" class="alignItems"></div>
       `;
       renderTasks();
       break;
@@ -56,8 +56,10 @@ function render(route) {
       break;
 
     case "questionnaires":
-      app.innerHTML = `<h1>Questionnaires</h1>
-      <p>Here you can view and fill out your questionnaires.</p>`;
+      app.innerHTML = `<div id="empContainerQuestionnaires" class="alignItems" style="flex-direction: column;">
+      <button id="employeeQuestionnaires" class="empQuestionnaire" style="display: none;"></button>
+      </div>`;
+      generateQuestionaire();
       break;
 
     default: // if no route found
@@ -93,4 +95,17 @@ function renderTeam() {
     div.textContent = "Team Member " + i;
     teamContainer.appendChild(div);
   }
+}
+
+function generateQuestionaire() {
+  let amountOfQuestionnaires = 2;
+    for (let i = 0; i < amountOfQuestionnaires; i++) {
+      //create the button
+      let insertedButton = document.createElement("button");
+      //insert the button
+      document.getElementById("empContainerQuestionnaires").appendChild(insertedButton);
+      insertedButton.className = "empQuestionnaire";
+      insertedButton.textContent = "Questionaire Name " + i;
+      insertedButton.style.display = "block";
+    }
 }

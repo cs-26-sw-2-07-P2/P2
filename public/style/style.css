@@ -62,19 +62,27 @@ button:hover {
   text-align: center;
 }
 .empQuestionnaire {
-color: rgb(0, 0, 0); 
-font-size: 25px; 
-line-height: 25px; 
-padding: 22px; 
-margin: 20px;
-border-radius: 22px; 
-border: 2px solid rgb(0, 102, 15); 
+  color: rgb(0, 0, 0); 
+  font-size: 25px; 
+  line-height: 25px; 
+  padding: 22px; 
+  margin: 10px;
+  border-radius: 22px; 
+  border: 2px solid rgb(0, 102, 15); 
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   cursor: pointer;
 }
+
+.alignItems {
+  flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+}
+/* WILLY STYLES END (imagine hvis jeg hed harry lmao så havde det været harry styles)*/
+
 .topnav {
   display: flex;
   background-color: #333;
