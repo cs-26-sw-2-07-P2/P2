@@ -170,9 +170,14 @@ const routes = [
   },
   {
     path: "/manager/questionnaire",
-    file: "managerPages/questionnaire.html",
+    file: "managerPages/createQuestionnaire.html",
     middleware: [requireLogin, requireRole("manager")],
   },
+  {
+    path: "/manager/createteams",
+    file:"managerPages/createTeams.html",
+    middleware: [requireLogin, requireRole("manager")],
+  }
 ];
 
 const registerPageRoutes = (app, routes) => {

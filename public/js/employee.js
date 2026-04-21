@@ -1,5 +1,8 @@
 'use strict'
 //import { logout } from "./logout.js";
+=======
+import { logout } from "./logout.js";
+>>>>>>> 9c7c795c954353892ecbce366096d2e764202b2d
 //NOTICE-------------------------- THESE 2 VARIABLES SHOULD BE CHANGED IN REGARDS TO HOW MANY TASKS THERE ARE, 3 AND 7 ARE PLACEHOLDERS
 let amountOfOngoingTasks = 3;
 let amountOfCompletedTasks = 7;
