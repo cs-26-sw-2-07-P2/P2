@@ -91,3 +91,9 @@ button:hover {
   background-color: #04AA6D;
   color: white;
 }
+.teamMember {
+  border: 5px solid rgb(63, 63, 63);
+  padding: 20px;
+  margin: 20px;
+  width: 200px;
+}
