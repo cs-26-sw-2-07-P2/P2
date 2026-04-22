@@ -88,6 +88,11 @@ button:hover {
   display: flex;
   align-items: center;
 }
+.boxTeamDiv1 {
+  margin-top: 10px;
+} .boxTeamDiv2 {
+  margin-bottom: 10px;
+}
 /*LINEBREAK:*/
 hr {
   width: 100%;

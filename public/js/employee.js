@@ -53,8 +53,7 @@ function render(route) {
 
     case "teams":
       app.innerHTML = `<h1>Your Team</h1>
-      <p>Here you can view your assigned team.</p>
-      <h4>Teamname: Team AAA</h4>
+      <p>Here you can view your assigned team(s).</p>
       <div id="containerTeam"></div>
       `;
       renderTeam();
@@ -72,12 +71,16 @@ function render(route) {
   }
 }
 
+//DO NOT MOVE THESE. THESE WILL BE EDITED LATER TO TAKE INPUT FROM SERVER.
+let overdueTasks = 1;
+let ongoingTasks = 2;
+let completedTasks = 7;
 function renderTasks() {
   const overdue = document.getElementById("containerOverdue");
   const ongoing = document.getElementById("containerOngoing");
   const completed = document.getElementById("containerCompleted");
 
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < overdueTasks; i++) {
     const div = document.createElement("div");
     div.className = "boxOverdue";
     //Text Fields
@@ -89,7 +92,7 @@ function renderTasks() {
     div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
     overdue.appendChild(div);
   }
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < ongoingTasks; i++) {
     const div = document.createElement("div");
     div.className = "boxOngoing";
     //Text Fields
@@ -101,7 +104,7 @@ function renderTasks() {
     div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
     ongoing.appendChild(div);
   }
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < completedTasks; i++) {
     const div = document.createElement("div");
     div.className = "boxCompleted";
     //Text Fields
@@ -117,12 +120,25 @@ function renderTasks() {
 
 function renderTeam() {
   const teamContainer = document.getElementById("containerTeam");
-
-  for (let i = 1; i < 6; i++) {
-    const div = document.createElement("div");
-    div.className = "boxTeam";
-    div.textContent = "Team Member " + i;
-    teamContainer.appendChild(div);
+  for (let j = 0; j < (overdueTasks+ongoingTasks); j++) {
+    let div1 = document.createElement("div");
+    div1.className = "boxTeamDiv1";
+    div1.innerHTML = `<b>Team ${j}</b>`;
+    teamContainer.appendChild(div1);
+    for (let i = 1; i < 6; i++) {
+    let div2 = document.createElement("div");
+    div2.className = "boxTeamDiv2";
+    //text fields
+    let name = 'John Software den ' + i + '.';
+    let email = 'johnnyboy@gmail.com'
+    let phone = '+45 67676767'
+    //evt tilføj skillset på hver employee????
+    div2.innerHTML = `${name}<br>${email}<br>${phone}`;
+    teamContainer.appendChild(div2);
+    }
+    let div3 = document.createElement("div");
+    div3.innerHTML = `<hr>`;
+    teamContainer.appendChild(div3);
   }
 }
 
