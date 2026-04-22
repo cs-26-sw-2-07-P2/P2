@@ -1,19 +1,15 @@
-# P2 Projekt
+P2 Projekt
 
 # Start database
-
 docker compose up -d
 
 # Install dependencies
-
-npm ci or npm install
+npm install
 
 # Setup Prisma
-
 npx prisma generate
 
 npx prisma migrate dev
 
 # Start server
-
 npm run dev

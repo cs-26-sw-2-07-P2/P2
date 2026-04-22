@@ -96,6 +96,13 @@ border: 2px solid rgb(0, 102, 15);
   background-color: #04AA6D;
   color: white;
 }
+<<<<<<< HEAD
+.teamMember {
+  border: 5px solid rgb(63, 63, 63);
+  padding: 20px;
+  margin: 20px;
+  width: 200px;
+=======
 
 /* push only selected item(s) to the right */
 .topnav .right {
@@ -106,4 +113,5 @@ border: 2px solid rgb(0, 102, 15);
   color: #f2f2f2;
   padding: 14px 16px;
   text-decoration: none;
+>>>>>>> main
 }
