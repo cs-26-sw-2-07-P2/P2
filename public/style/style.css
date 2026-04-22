@@ -48,9 +48,8 @@ button:hover {
    padding: 20px;
    margin: 20px;
    position: relative;
-   display: flex;
-   text-align: center;
-}   
+   text-align: left;
+} 
 .boxCompleted {
   width: 150px;
   height: 150px;
@@ -58,9 +57,17 @@ button:hover {
   padding: 20px;
   margin: 20px;
   position: relative;
-  display: flex;
-  text-align: center;
-}
+  text-align: left;
+} 
+.boxOverdue {
+  width: 150px;
+  height: 150px;
+  border: 5px solid rgb(202, 46, 46);
+  padding: 20px;
+  margin: 20px;
+  position: relative;
+  text-align: left;
+} 
 .empQuestionnaire {
   color: rgb(0, 0, 0); 
   font-size: 25px; 
@@ -80,6 +87,11 @@ button:hover {
   flex-wrap: wrap;
   display: flex;
   align-items: center;
+}
+/*LINEBREAK:*/
+hr {
+  width: 100%;
+  border: 1px solid #ccc;
 }
 /* WILLY STYLES END (imagine hvis jeg hed harry lmao så havde det været harry styles)*/
 

@@ -25,18 +25,23 @@ function navigate(route) {
 function render(route) {
   switch (route) {
     case "home":
-      app.innerHTML = `
-        <h1>Welcome USERNAME</h1>
-        <p>This is your employee dashboard where you can view your tasks, team and questionnaires.</p>
-        <p>Use the navigation bar above to access different sections of the dashboard.</p>
-
-        <h3>On this page you can see an overview of your current tasks:</h3>
-        <div id="containerOngoing" class="alignItems"></div>
+      app.innerHTML = `<h1>Home Page</h1>
+      <p>Hi USERNAME</p>
+      <p>Click the buttons at the top to navigate through the website.</p>
+      <h2>Your Tasks</h2>
+      <p>Here you can view your tasks.</p>
+      <p>Ongoing tasks are shown in green, completed tasks are shown in grey, and your overdue tasks are shown at the top in red.</p>
+      <hr></hr>
+      <div id="containerOverdue" class="alignItems"></div>
+      <hr></hr>
+      <div id="containerOngoing" class="alignItems"></div>
+      <hr></hr>
+      <div id="containerCompleted" class="alignItems"></div>
       `;
       renderTasks();
       break;
 
-    case "tasks":
+    /*case "tasks":
       app.innerHTML = `<h1>Your Tasks</h1>
       <p>Here you can view your tasks.</p>
       <p>Ongoing tasks are shown in green, completed tasks are shown in grey.</p>
@@ -44,7 +49,7 @@ function render(route) {
       <div id="containerCompleted" class="alignItems"></div>
       `;
       renderTasks();
-      break;
+      break;*/
 
     case "teams":
       app.innerHTML = `<h1>Your Team</h1>
@@ -55,12 +60,12 @@ function render(route) {
       renderTeam();
       break;
 
-    case "questionnaires":
+    /*case "questionnaires":
       app.innerHTML = `<div id="empContainerQuestionnaires" class="alignItems" style="flex-direction: column;">
       <button id="employeeQuestionnaires" class="empQuestionnaire" style="display: none;"></button>
       </div>`;
       generateQuestionaire();
-      break;
+      break;*/
 
     default: // if no route found
       app.innerHTML = `<h1>404</h1>`;
@@ -68,20 +73,44 @@ function render(route) {
 }
 
 function renderTasks() {
+  const overdue = document.getElementById("containerOverdue");
   const ongoing = document.getElementById("containerOngoing");
   const completed = document.getElementById("containerCompleted");
 
+  for (let i = 0; i < 1; i++) {
+    const div = document.createElement("div");
+    div.className = "boxOverdue";
+    //Text Fields
+    let title = "Overdue Task " + i;
+    let description = "Lorem ipsum"
+    let deadline = "Insert date here:"
+    let team = "Team X"
+    //final output
+    div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
+    overdue.appendChild(div);
+  }
   for (let i = 0; i < 2; i++) {
     const div = document.createElement("div");
     div.className = "boxOngoing";
-    div.textContent = "Task " + i;
+    //Text Fields
+    let title = "Task Number " + i;
+    let description = "Lorem ipsum"
+    let deadline = "Insert date here:"
+    let team = "Team X"
+    //final output
+    div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
     ongoing.appendChild(div);
   }
-
   for (let i = 0; i < 7; i++) {
     const div = document.createElement("div");
     div.className = "boxCompleted";
-    div.textContent = "Completed " + i;
+    //Text Fields
+    let title = "Completed Task " + i;
+    let description = "Lorem ipsum"
+    let deadline = "Insert date here:"
+    let team = "Team X"
+    //final output
+    div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
     completed.appendChild(div);
   }
 }
@@ -97,7 +126,7 @@ function renderTeam() {
   }
 }
 
-function generateQuestionaire() {
+/*function generateQuestionaire() {
   let amountOfQuestionnaires = 2;
     for (let i = 0; i < amountOfQuestionnaires; i++) {
       //create the button
@@ -108,4 +137,4 @@ function generateQuestionaire() {
       insertedButton.textContent = "Questionaire Name " + i;
       insertedButton.style.display = "block";
     }
-}
+}*/
