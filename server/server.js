@@ -27,7 +27,7 @@ app.get("/api/users", requireLogin, async (req, res) => {
     select: {
       id: true,
       username: true,
-      manager: true,
+      role: true,
       createdAt: true,
     },
   });
@@ -59,10 +59,10 @@ app.post("/login", async (req, res) => {
     req.session.user = {
       id: user.id,
       username: user.username,
-      manager: user.manager,
+      role: user.role,
     };
 
-    if (user.manager) {
+    if (user.role == "MANAGER") {
       res.json({ redirect: "/manager" });
     } else {
       res.json({ redirect: "/employee" });
@@ -79,7 +79,7 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, manager } = req.body;
 
   try {
     // check if user already exists
@@ -94,12 +94,15 @@ app.post("/register", async (req, res) => {
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Justify role
+    const role = manager ? "MANAGER" : "EMPLOYEE";
+
     // create user in DB
     const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
-        manager: Boolean(req.body.manager),
+        role,
       },
     });
 
@@ -165,15 +168,9 @@ function requireLogin(req, res, next) {
 // requireRole for pages only available to specific roles
 function requireRole(role) {
   return (req, res, next) => {
-    if (!req.session.user) {
-      return res.redirect("/");
-    }
+    if (!req.session.user) return res.redirect("/");
 
-    if (role === "manager" && !req.session.user.manager) {
-      return res.status(403).send("Forbidden");
-    }
-
-    if (role === "employee" && req.session.user.manager) {
+    if (req.session.user.role !== role) {
       return res.status(403).send("Forbidden");
     }
 
@@ -194,17 +191,17 @@ const routes = [
   {
     path: "/employee",
     file: "/employee.html",
-    middleware: [requireLogin, requireRole("employee")],
+    middleware: [requireLogin, requireRole("EMPLOYEE")],
   },
   {
     path: "/employee/questionnaires/selected",
     file: "employeePages/employeeSelectedQuestionnaire.html",
-    middleware: [requireLogin, requireRole("employee")],
+    middleware: [requireLogin, requireRole("EMPLOYEE")],
   },
   {
     path: "/manager",
     file: "/manager.html",
-    middleware: [requireLogin, requireRole("manager")],
+    middleware: [requireLogin, requireRole("MANAGER")],
   }
 ];
 
