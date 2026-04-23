@@ -1,4 +1,5 @@
-import { renderNavbar } from "./components/NavBar.js";
+import { renderNavbar } from "./components/navbar.js";
+import { renderQuestionnaires } from "./questionnaire.js";
 import { logout } from "./components/logout.js";
 
 let app;
@@ -68,12 +69,10 @@ function render(route) {
       renderTeam();
       break;
 
-    /*case "questionnaires":
-      app.innerHTML = `<div id="empContainerQuestionnaires" class="alignItems" style="flex-direction: column;">
-      <button id="employeeQuestionnaires" class="empQuestionnaire" style="display: none;"></button>
-      </div>`;
-      generateQuestionaire();
-      break;*/
+    case "questionnaires":
+      app.innerHTML = "<h1>Loading questionnaires...</h1>";
+      renderQuestionnaires(app);
+      break;
 
     default: // if no route found
       app.innerHTML = `<h1>404</h1>`;

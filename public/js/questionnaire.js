@@ -26,6 +26,67 @@ export async function renderQuestionnairePage(container) {
   document.getElementById("loadSavedQuestionnaire").onclick = loadSavedQuestionnaire;
   document.getElementById("clearQuestionnaire").onclick = clearQuestionnaire;
 }
+
+// render questionnaires for employees
+export async function renderQuestionnaires(container) {
+  try {
+    const response = await fetch("/api/questionnaires");
+
+    if (!response.ok) {
+      container.innerHTML = "<h1>Server error loading questionnaires</h1>";
+      return;
+    }
+
+    const result = await response.json();
+
+    const wrapper = document.createElement("div");
+
+    wrapper.innerHTML = `
+      <h1>Questionnaires</h1>
+    `;
+
+    const listContainer = document.createElement("div");
+
+    wrapper.appendChild(listContainer);
+
+    container.innerHTML = "";
+    container.appendChild(wrapper);
+
+    result.questionnaires.forEach(q => {
+      const box = document.createElement("div");
+      box.className = "questionnaireBox";
+
+      const table = document.createElement("table");
+
+      table.innerHTML = `
+        <tr>
+          <th>Question</th>
+        </tr>
+      `;
+
+      q.questions.forEach(item => {
+        const row = table.insertRow();
+
+        row.innerHTML = `
+          <td>${item.text}</td>
+        `;
+      });
+
+      box.innerHTML = `
+        <h2>${q.title}</h2>
+      `;
+
+      box.appendChild(table);
+
+      listContainer.appendChild(box);
+    });
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<h1>Error loading questionnaires</h1>";
+  }
+}
+
 let parameters = [];
 async function loadParameters() {
   const res = await fetch("/api/parameters");
@@ -99,7 +160,8 @@ async function sendQuestionnaire() {
   const result = await response.json();
 
   if (response.ok) {
-    alert("Saved!");
+  alert("Saved!");
+  await loadSavedQuestionnaire(); // reload UI
   } else {
     console.error(result.error);
   }

@@ -106,12 +106,24 @@ app.post("/register", async (req, res) => {
       },
     });
 
+    // create role-specific profile
+    await createRoleProfile(user);
+
     res.json({ success: true, userId: user.id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Registration failed" });
   }
 });
+
+// Handles Employee and Manager role seperation
+async function createRoleProfile(user) {
+  if (user.role === "MANAGER") {
+    return prisma.manager.create({ data: { userId: user.id } });
+  }
+
+  return prisma.employee.create({ data: { userId: user.id } });
+}
 
 // Fetch parameters from DB
 app.get("/api/parameters", async (req, res) => {
@@ -217,14 +229,14 @@ app.post("/api/questionnaires", async (req, res) => {
 });
 
 // Allow you to get the questionnaires
-app.get("/api/questionnaires", async(req, res) => {
+app.get("/api/questionnaires", async (req, res) => {
   try {
     const questionnaires = await prisma.questionnaire.findMany({
-      include: {
-        questions: true
-      }
+      include: { questions: true }
     });
+
     res.json({ success: true, questionnaires });
+
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch" });
   }
