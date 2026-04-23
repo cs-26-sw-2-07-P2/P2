@@ -62,6 +62,7 @@ function renderTasks() {
 
   document.getElementById("createTask").onclick = () => {
     console.log("Create Task");
+    app.innerHTML += `<h4>Task X</h4>`
   };
 
   document.getElementById("editTask").onclick = () => {
