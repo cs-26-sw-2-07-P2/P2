@@ -123,6 +123,59 @@ app.get("/api/parameters", async (req, res) => {
   }
 });
 
+app.post("/api/jobs", async (req, res) => {
+  const { name, parameters } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "Name is required" });
+  }
+
+  try {
+    const job = await prisma.job.create({
+      data: {
+        name,
+        parameters: {
+          create: parameters.map(p => ({
+            parameterId: p.parameterId,
+            weight: p.weight
+          }))
+        }
+      },
+      include: {
+        parameters: {
+          include: {
+            parameter: true
+          }
+        }
+      }
+    });
+
+    res.json({ success: true, job });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create job" });
+  }
+});
+
+app.get("/api/jobs", async (req, res) => {
+  try {
+    const jobs = await prisma.job.findMany({
+      include: {
+        parameters: {
+          include: {
+            parameter: true
+          }
+        }
+      }
+    });
+    
+    res.json({ jobs });
+
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
 // Creates sent questionnaires in DB
 app.post("/api/questionnaires", async (req, res) => {
   const { title, questions } = req.body;

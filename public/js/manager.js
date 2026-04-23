@@ -1,5 +1,6 @@
 import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
+import { renderDepartmentsPage } from "./departments.js";
 import { logout } from "./components/logout.js";
 
 let app;
@@ -35,8 +36,8 @@ function render(route) {
       renderTasks();
       break;
 
-    case "teams":
-      renderTeams();
+    case "departments":
+      renderDepartmentsPage(app);
       break;
 
     case "questionnaires":
@@ -70,30 +71,5 @@ function renderTasks() {
 
   document.getElementById("viewTask").onclick = () => {
     console.log("View Tasks");
-  };
-}
-
-function renderTeams() {
-  app.innerHTML = `
-    <h1>Team Management</h1>
-    <p>Here you are able to manage your teams.</p>
-    <p>Use the buttons below to create, edit and view teams.</p>
-    <p>These teams will be assigned tasks to complete, through the 'Tasks' tab.</p>
-
-    <button id="createTeam">Create New Team</button>
-    <button id="editTeam">Edit Teams</button>
-    <button id="viewTeams">Team Overview</button>
-  `;
-
-  document.getElementById("createTeam").onclick = () => {
-    console.log("Create Team");
-  };
-
-  document.getElementById("editTeam").onclick = () => {
-    console.log("Edit Team");
-  };
-
-  document.getElementById("viewTeams").onclick = () => {
-    console.log("View Teams");
   };
 }
