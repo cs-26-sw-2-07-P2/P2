@@ -6,7 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
-const dev_mode = true; // only for development
+const dev_mode = false; // only for development
 
 app.use(express.json()); // Important for json formatting (Loginpage)
 
@@ -168,7 +168,7 @@ app.get("/api/jobs", async (req, res) => {
         }
       }
     });
-    
+
     res.json({ jobs });
 
   } catch (err) {
@@ -250,6 +250,18 @@ function requireRole(role) {
     next();
   };
 }
+
+// Get user (Used for navbar role)
+app.get("/api/me", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ authenticated: false });
+  }
+
+  res.json({
+    authenticated: true,
+    user: req.session.user
+  });
+});
 
 // Routing
 const routes = [

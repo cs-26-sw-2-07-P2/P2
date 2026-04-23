@@ -4,17 +4,26 @@ import { logout } from "./components/logout.js";
 let app;
 let navbarContainer;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   app = document.getElementById("app");
   navbarContainer = document.getElementById("navbar");
 
-  const navbar = renderNavbar("manager", navigate);
+  // Get real user from session
+  const res = await fetch("/api/me");
+  const data = await res.json();
+
+  if (!data.authenticated) {
+    window.location.href = "/";
+    return;
+  }
+
+  const navbar = await renderNavbar((route) => navigate(route));
   navbarContainer.appendChild(navbar);
 
   document.addEventListener("click", (e) => {
     if (e.target.id === "logout") logout();
   });
-  insertedButton.addEventListener("click", generateQuestionaire);
+
   navigate("home");
 });
 
