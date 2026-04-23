@@ -1,3 +1,6 @@
+// Department data for all the different departments in the park, including descriptions and employee profiles.
+// All departments have different parameters for the employee profiles, such as whether they work outside, have customer contact, physical demand, and difficulty level. 
+// This data will be used to match employees to suitable departments based on their preferences and qualifications.
 
 const departmentData = {
     "Rides": {
