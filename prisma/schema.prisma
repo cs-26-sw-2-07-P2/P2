@@ -28,11 +28,20 @@ model Employee {
   responses  Response[]
 }
 
-model Team {
+model Department {
   id        Int        @id @default(autoincrement())
   name      String
+  createdAt DateTime   @default(now())
 
   employees Employee[]
+  parameters Parameters[]
+}
+
+// Parameters define departments
+model Parameters {
+  id        Int
+  name      String
+  weight    Float
 }
 
 // QUESTIONNAIRE SYSTEM
@@ -57,7 +66,7 @@ model Question {
 model Response {
   id          Int      @id @default(autoincrement())
 
-  answer      String   // keep simple for now
+  answer      Int
 
   questionId  Int
   question    Question @relation(fields: [questionId], references: [id])
