@@ -113,32 +113,52 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Fetch parameters from DB
+app.get("/api/parameters", async (req, res) => {
+  try {
+    const parameters = await prisma.parameter.findMany();
+    res.json({ parameters });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch parameters" });
+  }
+});
+
 // Creates sent questionnaires in DB
 app.post("/api/questionnaires", async (req, res) => {
   const { title, questions } = req.body;
 
-  if (!title) {
-  return res.status(400).json({ error: "Title is required" });
-}
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   try {
+    // find manager record if exists
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id }
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
     const questionnaire = await prisma.questionnaire.create({
       data: {
         title,
+        createdById: manager.id,
         questions: {
-          create: questions
-            .filter(q => q.text?.trim()) // q is used as a temporary object to handle the text
-            .map(q => ({
-              text: q.text.trim()
-            }))
+          create: questions.map(q => ({
+            text: q.text,
+            parameterId: q.parameterId
+          }))
         }
       },
-      include: {
-        questions: true
-      }
+      include: { questions: true }
     });
+
     res.json({ success: true, questionnaire });
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to send Questionnaire" });
   }
 });
