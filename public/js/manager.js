@@ -61,6 +61,8 @@ function render(route) {
   let overdueTasks = 1;
   let ongoingTasks = 2;
   let completedTasks = 7;
+  let submittedTaskCounter = 0; 
+  let submittedTasks = [];
 function renderTasks() {
   app.innerHTML = `
     <h1>Task Management</h1>
@@ -91,7 +93,6 @@ function renderTasks() {
     </table>
     <button id="submitTask">Submit Task</button></div>
   `;
-
   document.getElementById("createTask").onclick = () => {
     console.log("Create Task");
     document.getElementById("taskTable").style.display = "block";
@@ -110,17 +111,26 @@ function renderTasks() {
             <option value="restaurant">Restaurant</option>
             <option value="parking">Parking</option>
         </select></th>
-        <th><input type="date" value="2017-06-01" /></th>
-        <th><input type="number" min="1"></th>
+        <th><input id="deadline" type="date" value="2017-06-01" /></th>
+        <th><input id="nrEmp" type="number" min="1"></th>
       </tr>      
-    </table>
-    <button id="submitTask">Submit Task</button></div>
-    `
-    document.getElementById("submitTask").onclick = () => {
-    console.log("Submitted.");
-    document.getElementById("taskTable").style.display = "block";
-    document.getElementById("taskTable").innerHTML =``};
-    ongoingTasks += 1;
+      </table>
+      <button id="submitTask">Submit Task</button></div>
+      `
+      document.getElementById("submitTask").onclick = () => {
+      console.log("Submitted.");
+
+      //create object every submit
+      let newTask = new task(
+      //Text Fields
+      document.getElementById("taskTitle").value,
+      document.getElementById("taskDesc").value,
+      document.getElementById("managerTeams").value,
+      document.getElementById("deadline").value,
+      document.getElementById("nrEmp").value);
+      submittedTasks.push(newTask);
+      submittedTaskCounter+=1;
+    };
   };
 
   document.getElementById("taskOverview").onclick = () => {
@@ -162,6 +172,15 @@ function renderTasks() {
             div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
             ongoing.appendChild(div);
           }
+            for (let i = 0; i < submittedTasks.length; i++) {
+              const div = document.createElement("div");
+              div.className = "boxOngoing";
+              div.innerHTML = `<div><b>${submittedTasks[i].title}</b></div><br><br>
+              ${submittedTasks[i].description}<br><br>
+              ${submittedTasks[i].deadline}<br><br>
+              ${submittedTasks[i].team}`;
+              ongoing.appendChild(div);
+            }
         }
         generateTasks();
     };
@@ -175,7 +194,6 @@ function renderTasks() {
       - Remove completed tasks automatically after X days. - Sort tasks by time completed.</p>
       <div id="containerCompleted" class="alignItems"></div>`
     function generateTasks() {
-    
     const completed = document.getElementById("containerCompleted");
         for (let i = 0; i < completedTasks; i++) {
             const div = document.createElement("div");
@@ -192,4 +210,12 @@ function renderTasks() {
         }
         generateTasks();
   };
+}
+
+function task(title, description, team, deadline, empNr){
+  this.title = title
+  this.description = description
+  this.team = team
+  this.deadline = deadline
+  this.empNr = empNr
 }
