@@ -58,9 +58,11 @@ export async function renderQuestionnaires(container) {
 
       const table = document.createElement("table");
 
+      table.id = "employeeQuestionnaire";
       table.innerHTML = `
         <tr>
           <th>Question</th>
+          <th>Answer</th>
         </tr>
       `;
 
@@ -69,6 +71,18 @@ export async function renderQuestionnaires(container) {
 
         row.innerHTML = `
           <td>${item.text}</td>
+          <td>
+            <select>
+              <option value=1>1 - Strongly Disagree</option>
+              <option value=2>2 - Disagree</option>
+              <option value=3>3 - Neutral</option>
+              <option value=4>4 - Agree</option>
+              <option value=5>5 - Strongly Agree</option>
+            </select>
+          </td>
+          <td>
+            // To do slider
+          </td>
         `;
       });
 
@@ -77,8 +91,18 @@ export async function renderQuestionnaires(container) {
       `;
 
       box.appendChild(table);
+      
+      // Save anwers funktionalitet
+      const button = document.createElement("div");
+      button.innerHTML = `
+      <button id="saveAnswers">Save Answers</button>
+      `;
+      box.appendChild(button);
 
       listContainer.appendChild(box);
+
+      document.getElementById("saveAnswers").onclick = saveAnswers;
+
     });
 
   } catch (err) {
@@ -97,6 +121,24 @@ async function loadParameters() {
 //
 // Helper functions
 //
+function saveAnswers(){
+  const table = document.getElementById("employeeQuestionnaire");
+
+  
+  const questions = [];
+
+  for (let i = 1; i < table.rows.length; i++) {
+    const question = table.rows[i].cells[0].innerText;
+    const answer = table.rows[i].cells[1].querySelector("select").value;
+    questions.push({question, answer})
+  }
+
+
+  
+  console.log(questions);
+}
+
+
 function addDropDownOptions(selected = "") {
   return parameters.map(p =>
     `<option value="${p.id}" ${p.id == selected ? "selected" : ""}>
