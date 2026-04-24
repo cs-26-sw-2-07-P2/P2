@@ -58,6 +58,9 @@ function render(route) {
   }
 }
 
+  let overdueTasks = 1;
+  let ongoingTasks = 2;
+  let completedTasks = 7;
 function renderTasks() {
   app.innerHTML = `
     <h1>Task Management</h1>
@@ -116,8 +119,8 @@ function renderTasks() {
     document.getElementById("submitTask").onclick = () => {
     console.log("Submitted.");
     document.getElementById("taskTable").style.display = "block";
-    document.getElementById("taskTable").innerHTML =`
-    `};
+    document.getElementById("taskTable").innerHTML =``};
+    ongoingTasks += 1;
   };
 
   document.getElementById("taskOverview").onclick = () => {
@@ -132,8 +135,7 @@ function renderTasks() {
       <hr></hr>
       <div id="containerOngoing" class="alignItems"></div>`
     function generateTasks() {
-    let overdueTasks = 1;
-    let ongoingTasks = 2;
+
     const overdue = document.getElementById("containerOverdue");
     const ongoing = document.getElementById("containerOngoing");
         for (let i = 0; i < overdueTasks; i++) {
@@ -173,7 +175,7 @@ function renderTasks() {
       - Remove completed tasks automatically after X days. - Sort tasks by time completed.</p>
       <div id="containerCompleted" class="alignItems"></div>`
     function generateTasks() {
-    let completedTasks = 7;
+    
     const completed = document.getElementById("containerCompleted");
         for (let i = 0; i < completedTasks; i++) {
             const div = document.createElement("div");
