@@ -1,20 +1,30 @@
-import { renderNavbar } from "./components/NavBar.js";
+import { renderNavbar } from "./components/navbar.js";
+import { renderQuestionnaires } from "./questionnaire.js";
 import { logout } from "./components/logout.js";
 
 let app;
 let navbarContainer;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   app = document.getElementById("app");
   navbarContainer = document.getElementById("navbar");
 
-  const navbar = renderNavbar("manager", navigate);
+  // Get real user from session
+  const res = await fetch("/api/me");
+  const data = await res.json();
+
+  if (!data.authenticated) {
+    window.location.href = "/";
+    return;
+  }
+
+  const navbar = await renderNavbar((route) => navigate(route));
   navbarContainer.appendChild(navbar);
 
   document.addEventListener("click", (e) => {
     if (e.target.id === "logout") logout();
   });
-  insertedButton.addEventListener("click", generateQuestionaire);
+
   navigate("home");
 });
 
@@ -59,12 +69,10 @@ function render(route) {
       renderTeam();
       break;
 
-    /*case "questionnaires":
-      app.innerHTML = `<div id="empContainerQuestionnaires" class="alignItems" style="flex-direction: column;">
-      <button id="employeeQuestionnaires" class="empQuestionnaire" style="display: none;"></button>
-      </div>`;
-      generateQuestionaire();
-      break;*/
+    case "questionnaires":
+      app.innerHTML = "<h1>Loading questionnaires...</h1>";
+      renderQuestionnaires(app);
+      break;
 
     default: // if no route found
       app.innerHTML = `<h1>404</h1>`;

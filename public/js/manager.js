@@ -1,15 +1,25 @@
 import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
+import { renderDepartmentsPage } from "./departments.js";
 import { logout } from "./components/logout.js";
 
 let app;
 let navbarContainer;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   app = document.getElementById("app");
   navbarContainer = document.getElementById("navbar");
 
-  const navbar = renderNavbar("manager", navigate);
+  // Get Actual user
+  const res = await fetch("/api/me");
+  const data = await res.json();
+
+  if (!data.authenticated) {
+    window.location.href = "/";
+    return;
+  }
+
+  const navbar = await renderNavbar((route) => navigate(route));
   navbarContainer.appendChild(navbar);
 
   document.addEventListener("click", (e) => {
@@ -35,8 +45,8 @@ function render(route) {
       renderTasks();
       break;
 
-    case "teams":
-      renderTeams();
+    case "departments":
+      renderDepartmentsPage(app);
       break;
 
     case "questionnaires":
@@ -179,30 +189,5 @@ function renderTasks() {
             }
         }
         generateTasks();
-  };
-}
-
-function renderTeams() {
-  app.innerHTML = `
-    <h1>Team Management</h1>
-    <p>Here you are able to manage your teams.</p>
-    <p>Use the buttons below to create, edit and view teams.</p>
-    <p>These teams will be assigned tasks to complete, through the 'Tasks' tab.</p>
-
-    <button id="createTeam">Create New Team</button>
-    <button id="editTeam">Edit Teams</button>
-    <button id="viewTeams">Team Overview</button>
-  `;
-
-  document.getElementById("createTeam").onclick = () => {
-    console.log("Create Team");
-  };
-
-  document.getElementById("editTeam").onclick = () => {
-    console.log("Edit Team");
-  };
-
-  document.getElementById("viewTeams").onclick = () => {
-    console.log("View Teams");
   };
 }

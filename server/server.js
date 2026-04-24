@@ -6,7 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
-const dev_mode = true; // only for development
+const dev_mode = false; // only for development
 
 app.use(express.json()); // Important for json formatting (Loginpage)
 
@@ -27,7 +27,7 @@ app.get("/api/users", requireLogin, async (req, res) => {
     select: {
       id: true,
       username: true,
-      manager: true,
+      role: true,
       createdAt: true,
     },
   });
@@ -59,10 +59,10 @@ app.post("/login", async (req, res) => {
     req.session.user = {
       id: user.id,
       username: user.username,
-      manager: user.manager,
+      role: user.role,
     };
 
-    if (user.manager) {
+    if (user.role == "MANAGER") {
       res.json({ redirect: "/manager" });
     } else {
       res.json({ redirect: "/employee" });
@@ -79,7 +79,7 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, manager } = req.body;
 
   try {
     // check if user already exists
@@ -94,14 +94,20 @@ app.post("/register", async (req, res) => {
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Justify role
+    const role = manager ? "MANAGER" : "EMPLOYEE";
+
     // create user in DB
     const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
-        manager: Boolean(req.body.manager),
+        role,
       },
     });
+
+    // create role-specific profile
+    await createRoleProfile(user);
 
     res.json({ success: true, userId: user.id });
   } catch (err) {
@@ -110,45 +116,127 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Handles Employee and Manager role seperation
+async function createRoleProfile(user) {
+  if (user.role === "MANAGER") {
+    return prisma.manager.create({ data: { userId: user.id } });
+  }
+
+  return prisma.employee.create({ data: { userId: user.id } });
+}
+
+// Fetch parameters from DB
+app.get("/api/parameters", async (req, res) => {
+  try {
+    const parameters = await prisma.parameter.findMany();
+    res.json({ parameters });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch parameters" });
+  }
+});
+
+app.post("/api/jobs", async (req, res) => {
+  const { name, parameters } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "Name is required" });
+  }
+
+  try {
+    const job = await prisma.job.create({
+      data: {
+        name,
+        parameters: {
+          create: parameters.map(p => ({
+            parameterId: p.parameterId,
+            weight: p.weight
+          }))
+        }
+      },
+      include: {
+        parameters: {
+          include: {
+            parameter: true
+          }
+        }
+      }
+    });
+
+    res.json({ success: true, job });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create job" });
+  }
+});
+
+app.get("/api/jobs", async (req, res) => {
+  try {
+    const jobs = await prisma.job.findMany({
+      include: {
+        parameters: {
+          include: {
+            parameter: true
+          }
+        }
+      }
+    });
+
+    res.json({ jobs });
+
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
 // Creates sent questionnaires in DB
 app.post("/api/questionnaires", async (req, res) => {
   const { title, questions } = req.body;
 
-  if (!title) {
-  return res.status(400).json({ error: "Title is required" });
-}
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   try {
+    // find manager record if exists
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id }
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
     const questionnaire = await prisma.questionnaire.create({
       data: {
         title,
+        createdById: manager.id,
         questions: {
-          create: questions
-            .filter(q => q.text?.trim()) // q is used as a temporary object to handle the text
-            .map(q => ({
-              text: q.text.trim()
-            }))
+          create: questions.map(q => ({
+            text: q.text,
+            parameterId: q.parameterId
+          }))
         }
       },
-      include: {
-        questions: true
-      }
+      include: { questions: true }
     });
+
     res.json({ success: true, questionnaire });
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to send Questionnaire" });
   }
 });
 
 // Allow you to get the questionnaires
-app.get("/api/questionnaires", async(req, res) => {
+app.get("/api/questionnaires", async (req, res) => {
   try {
     const questionnaires = await prisma.questionnaire.findMany({
-      include: {
-        questions: true
-      }
+      include: { questions: true }
     });
+
     res.json({ success: true, questionnaires });
+
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch" });
   }
@@ -165,21 +253,27 @@ function requireLogin(req, res, next) {
 // requireRole for pages only available to specific roles
 function requireRole(role) {
   return (req, res, next) => {
-    if (!req.session.user) {
-      return res.redirect("/");
-    }
+    if (!req.session.user) return res.redirect("/");
 
-    if (role === "manager" && !req.session.user.manager) {
-      return res.status(403).send("Forbidden");
-    }
-
-    if (role === "employee" && req.session.user.manager) {
+    if (req.session.user.role !== role) {
       return res.status(403).send("Forbidden");
     }
 
     next();
   };
 }
+
+// Get user (Used for navbar role)
+app.get("/api/me", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ authenticated: false });
+  }
+
+  res.json({
+    authenticated: true,
+    user: req.session.user
+  });
+});
 
 // Routing
 const routes = [
@@ -194,17 +288,17 @@ const routes = [
   {
     path: "/employee",
     file: "/employee.html",
-    middleware: [requireLogin, requireRole("employee")],
+    middleware: [requireLogin, requireRole("EMPLOYEE")],
   },
   {
     path: "/employee/questionnaires/selected",
     file: "employeePages/employeeSelectedQuestionnaire.html",
-    middleware: [requireLogin, requireRole("employee")],
+    middleware: [requireLogin, requireRole("EMPLOYEE")],
   },
   {
     path: "/manager",
     file: "/manager.html",
-    middleware: [requireLogin, requireRole("manager")],
+    middleware: [requireLogin, requireRole("MANAGER")],
   }
 ];
 
