@@ -121,9 +121,26 @@ async function loadParameters() {
 //
 // Helper functions
 //
-function saveAnswers(){
-  const table = document.getElementById("employeeQuestionnaire");
+async function getEmployee(){
+  const res = await fetch("/api/employee");
 
+  if (!res.ok){
+    return null;
+  }
+
+  const data = await res.json();
+  return data.employee;
+}
+
+async function saveAnswers(){
+  const table = document.getElementById("employeeQuestionnaire");
+  const employee = await getEmployee();
+
+  if (!employee){
+    window.location.href = "/";
+    return;
+  }
+  const id = employee.id;
   
   const questions = [];
 
@@ -131,6 +148,23 @@ function saveAnswers(){
     const question = table.rows[i].cells[0].innerText;
     const answer = table.rows[i].cells[1].querySelector("select").value;
     questions.push({question, answer})
+  }
+
+  const payload = { id, questions };
+
+  const response = await fetch("/api/response", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+
+  if (response.ok) {
+  alert("Saved!");
+  await loadSavedQuestionnaire(); // reload UI
+  } else {
+    console.error(result.error);
   }
 
 

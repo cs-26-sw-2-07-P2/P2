@@ -242,6 +242,45 @@ app.get("/api/questionnaires", async (req, res) => {
   }
 });
 
+app.post("/api/response", async (req, res) => {
+  const { id, questions, title } = req.body;
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    // find employee record if exists
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id }
+    });
+
+    if (!employee) {
+      return res.status(403).json({ error: "Not an employee!" });
+    }
+    
+  const response = await prisma.response.create({
+      data: {
+        title,
+        employeeId: employee.id,
+        questions: {
+          create: questions.map(q => ({
+            question: q.question,
+            value: q.answer
+          }))
+        }
+      },
+      include: { questions: true}
+    });
+
+    res.json({ success: true, response });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
 // requireLogin for session based routing
 function requireLogin(req, res, next) {
   if (!req.session.user) {
@@ -273,6 +312,18 @@ app.get("/api/me", (req, res) => {
     authenticated: true,
     user: req.session.user
   });
+});
+
+// Get employee
+app.get("/api/employee", async (req, res) => {
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+    res.json({ success: true, employee });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch" });
+  }
 });
 
 // Routing
