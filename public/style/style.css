@@ -1,20 +1,146 @@
-#loginBody {
+:root {
+  /* Colors */
+  --color-primary: #04aa6d;
+  --color-primary-hover: #03995f;
+
+  --color-bg: #f3f4f6;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+
+  --color-navbar: #1f2937;
+  --color-navbar-text: #f9fafb;
+
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+
+  /* Spacing */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+
+  /* UI */
+  --radius: 8px;
+  --shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Global base */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+main {
+  padding: var(--space-3);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-2);
+}
+
+p {
+  color: var(--color-text-muted);
+}
+
+/* Login and Register styling */
+/* ===== Auth Layout ===== */
+.auth {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg,#f9fafb 0%,#eef2f7 100%);
 }
 
-#loginForm {
-  max-width: 500px;
+/* ===== Card ===== */
+.auth-card {
   width: 100%;
-  border: 3px solid #f1f1f1;
-  padding: 16px;
-  text-align: center;
-  font-size: 20px;
+  max-width: 400px;
+  background: var(--color-surface);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
+/* ===== Titles ===== */
+.auth-card h2 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xl);
+}
+
+.auth-subtitle {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* ===== Form ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-2);
+}
+
+.form-group label {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: border 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* ===== Checkbox ===== */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: var(--space-2);
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.btn-secondary {
+  width: 100%;
+  margin-top: var(--space-1);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg);
+}
+
+/* input fields for login/register */
 input[type="text"],
 input[type="password"] {
   width: 100%;
@@ -25,85 +151,215 @@ input[type="password"] {
   box-sizing: border-box;
 }
 
-/*button {
-  background-color: #04aa6d;
+/* Global buttons */
+button {
+  background-color: var(--color-primary);
   color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
+  padding: 10px 16px;
   border: none;
+  border-radius: var(--radius);
   cursor: pointer;
-  width: 100%;
-}*/
+  transition: 0.2s;
+}
 
 button:hover {
-  opacity: 0.8;
+  background-color: var(--color-primary-hover);
 }
 
-/* WILLY STYLES (imagine hvis jeg hed harry lmao så havde det været harry styles)*/
+/* Questionnaire table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-2);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+}
 
-.boxOngoing {
-   width: 150px;
-   height: 150px;
-   border: 5px solid rgb(90, 209, 88);
-   padding: 20px;
-   margin: 20px;
-   position: relative;
-   display: flex;
-   text-align: center;
-}   
-.boxCompleted {
-  width: 150px;
-  height: 150px;
-  border: 5px solid rgb(135, 135, 135);
-  padding: 20px;
-  margin: 20px;
-  position: relative;
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  background: var(--color-bg);
+}
+
+/* Page header */
+.page-header {
+  margin-bottom: var(--space-3);
+}
+
+.page-header h1 {
+  margin-bottom: 4px;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+/* Cards */
+.card {
+  background: var(--color-surface);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-3);
+}
+
+/* Sections */
+.task-section {
+  margin-bottom: var(--space-3);
+}
+
+.task-section h3 {
+  margin-bottom: var(--space-1);
+}
+
+/* Grid for tasks */
+.grid {
   display: flex;
-  text-align: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
+
+/* Box styling */
+.box {
+  width: 180px;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+  border-left: 6px solid;
+}
+
+.box.ongoing { border-color: var(--color-success); }
+.box.completed { border-color: #9ca3af; }
+.box.overdue { border-color: var(--color-error); }
+
 .empQuestionnaire {
-color: rgb(0, 0, 0); 
-font-size: 25px; 
-line-height: 25px; 
-padding: 22px; 
-margin: 20px;
-border-radius: 22px; 
-border: 2px solid rgb(0, 102, 15); 
+  color: rgb(0, 0, 0); 
+  font-size: 25px; 
+  line-height: 25px; 
+  padding: 22px; 
+  margin: 10px;
+  border-radius: 22px; 
+  border: 2px solid rgb(0, 102, 15); 
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   cursor: pointer;
 }
+
+.alignItems {
+  flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+}
+.boxTeamDiv1 {
+  margin-top: 10px;
+} .boxTeamDiv2 {
+  margin-bottom: 10px;
+}
+/*LINEBREAK:*/
+hr {
+  width: 100%;
+  border: 1px solid #ccc;
+}
+
+/* Navbar styling */
 .topnav {
   display: flex;
-  background-color: #333;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-navbar);
+  padding: 0 var(--space-3);
+  height: 60px;
+}
+
+/* Left links */
+.nav-left {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.nav-left a {
+  color: var(--color-navbar-text);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  transition: 0.2s;
+}
+
+.nav-left a:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.nav-left a.active {
+  background-color: var(--color-primary);
+}
+
+/* Right section */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* User label */
+.nav-user {
+  color: var(--color-navbar-text);
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Logout button */
+.btn-logout {
+  background: transparent;
+  color: var(--color-navbar-text);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Slider content */
+.slidecontainer {
   width: 100%;
 }
 
-.topnav a {
-  color: #f2f2f2;
-  padding: 14px 16px;
-  text-decoration: none;
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
 }
 
-.topnav a:hover {
-  background-color: #ddd;
-  color: black;
+.slider:hover {
+  opacity: 1;
 }
 
-.topnav a.active {
-  background-color: #04AA6D;
-  color: white;
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #04AA6D;
+  cursor: pointer;
 }
 
-/* push only selected item(s) to the right */
-.topnav .right {
-  margin-left: auto;
-}
-
-#logout {
-  color: #f2f2f2;
-  padding: 14px 16px;
-  text-decoration: none;
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #04AA6D;
+  cursor: pointer;
 }

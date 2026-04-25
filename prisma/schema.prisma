@@ -7,66 +7,108 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ======================
+// AUTH / USERS
+// ======================
 model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   password  String
-  role      Role     @default(USER)
+  role      Role     @default(EMPLOYEE)
   createdAt DateTime @default(now())
 
-  employee  Employee?
+  employee Employee?
+  manager  Manager?
 }
 
 model Employee {
-  id         Int   @id @default(autoincrement())
-  userId     Int   @unique
-  user       User  @relation(fields: [userId], references: [id])
+  id     Int @id @default(autoincrement())
+  userId Int @unique
 
-  teamId     Int?
-  team       Team? @relation(fields: [teamId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  responses  Response[]
+  responses Response[]
 }
 
-model Team {
-  id        Int        @id @default(autoincrement())
-  name      String
+model Manager {
+  id     Int @id @default(autoincrement())
+  userId Int @unique
 
-  employees Employee[]
+  user           User            @relation(fields: [userId], references: [id])
+  questionnaires Questionnaire[]
 }
 
+model Parameter {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  questions     Question[]
+  jobParameters JobParameter[]
+}
+
+// Job (type) / Department
+model Job {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  parameters JobParameter[]
+}
+
+model JobParameter {
+  id Int @id @default(autoincrement())
+
+  jobId       Int
+  parameterId Int
+
+  weight Int // 1–5 importance
+
+  job       Job       @relation(fields: [jobId], references: [id])
+  parameter Parameter @relation(fields: [parameterId], references: [id])
+
+  @@unique([jobId, parameterId])
+}
+
+// ======================
 // QUESTIONNAIRE SYSTEM
+// ======================
 model Questionnaire {
-  id        Int        @id @default(autoincrement())
-  title     String
-  createdAt DateTime   @default(now())
+  id          Int      @id @default(autoincrement())
+  title       String
+  createdAt   DateTime @default(now())
+  createdById Int
+  createdBy   Manager  @relation(fields: [createdById], references: [id])
 
   questions Question[]
 }
 
 model Question {
-  id              Int           @id @default(autoincrement())
-  text            String
+  id   Int    @id @default(autoincrement())
+  text String
 
   questionnaireId Int
-  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+  parameterId     Int
 
-  responses       Response[]
+  questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id])
+  parameter     Parameter     @relation(fields: [parameterId], references: [id])
+
+  responses Response[]
 }
 
 model Response {
-  id          Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  answer      String   // keep simple for now
+  value Int
 
-  questionId  Int
-  question    Question @relation(fields: [questionId], references: [id])
+  employeeId Int
+  questionId Int
 
-  employeeId  Int
-  employee    Employee @relation(fields: [employeeId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, questionId])
 }
 
 enum Role {
-  USER
+  EMPLOYEE
   MANAGER
 }

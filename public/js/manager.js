@@ -1,15 +1,25 @@
 import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
+import { renderDepartmentsPage } from "./departments.js";
 import { logout } from "./components/logout.js";
 
 let app;
 let navbarContainer;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   app = document.getElementById("app");
   navbarContainer = document.getElementById("navbar");
 
-  const navbar = renderNavbar("manager", navigate);
+  // Get Actual user
+  const res = await fetch("/api/me");
+  const data = await res.json();
+
+  if (!data.authenticated) {
+    window.location.href = "/";
+    return;
+  }
+
+  const navbar = await renderNavbar((route) => navigate(route));
   navbarContainer.appendChild(navbar);
 
   document.addEventListener("click", (e) => {
@@ -26,15 +36,17 @@ function navigate(route) {
 function render(route) {
   switch (route) {
     case "home":
-      app.innerHTML = `<h1>Manager Dashboard</h1>`;
+      app.innerHTML = `<h1>Welcome USERNAME</h1>
+      <p>Welcome to your manager dashboard. Here you can manage your tasks, teams and questionnaires.</p>
+      <p>Use the navigation bar above to access different sections of the dashboard.</p>`;
       break;
 
     case "tasks":
       renderTasks();
       break;
 
-    case "teams":
-      renderTeams();
+    case "departments":
+      renderDepartmentsPage(app);
       break;
 
     case "questionnaires":
@@ -46,48 +58,164 @@ function render(route) {
   }
 }
 
+  let overdueTasks = 1;
+  let ongoingTasks = 2;
+  let completedTasks = 7;
+  let submittedTaskCounter = 0; 
+  let submittedTasks = [];
 function renderTasks() {
   app.innerHTML = `
     <h1>Task Management</h1>
-    <p>Here you can manage tasks.</p>
+    <p>Here you are able to manage tasks and assign them to Teams.</p>
+    <p>Use the buttons below to create, edit and view tasks.</p>
 
     <button id="createTask">Create New Task</button>
-    <button id="editTask">Edit Existing Tasks</button>
-    <button id="viewTask">Task Overview</button>
-  `;
+    <button id="taskOverview">View Ongoing and Overdue Tasks</button>
+    <button id="completedTasks">View Completed Tasks</button>
 
+    <div id="taskTable" style="margin-top: 20px; display: none;">
+    <table>
+        <tr>
+            <th>Title</th><th>Description</th><th>Team</th><th>Deadline</th><th>Employees</th></tr>
+      <tr>
+        <th><input id="taskTitle" placeholder="Enter task title"/></th>
+        <th><input id="taskDesc" placeholder="Enter task description"/></th>
+        <!--Insert correct teams that have been made-->
+        <th><select name="teams" id="managerTeams">
+            <option value="choose">Select Team</option>
+            <option value="cleaning">Cleaning</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="parking">Parking</option>
+        </select></th>
+        <th><input type="date" value="2017-06-01" /></th>
+        <th><input type="number" min="1"></th>
+      </tr>      
+    </table>
+    <button id="submitTask">Submit Task</button></div>
+  `;
   document.getElementById("createTask").onclick = () => {
     console.log("Create Task");
+    document.getElementById("taskTable").style.display = "block";
+    document.getElementById("taskTable").innerHTML =`
+    <div id="taskTable" style="margin-top: 20px;">
+    <table>
+        <tr>
+            <th>Title</th><th>Description</th><th>Team</th><th>Deadline</th><th>Employees</th></tr>
+      <tr>
+        <th><input id="taskTitle" placeholder="Enter task title"/></th>
+        <th><input id="taskDesc" placeholder="Enter task description"/></th>
+        <!--Insert correct teams that have been made-->
+        <th><select name="teams" id="managerTeams">
+            <option value="choose">Select Team</option>
+            <option value="cleaning">Cleaning</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="parking">Parking</option>
+        </select></th>
+        <th><input id="deadline" type="date" value="2017-06-01" /></th>
+        <th><input id="nrEmp" type="number" min="1"></th>
+      </tr>      
+      </table>
+      <button id="submitTask">Submit Task</button></div>
+      `
+      document.getElementById("submitTask").onclick = () => {
+      console.log("Submitted.");
+
+      //create object every submit
+      let newTask = new task(
+      //Text Fields
+      document.getElementById("taskTitle").value,
+      document.getElementById("taskDesc").value,
+      document.getElementById("managerTeams").value,
+      document.getElementById("deadline").value,
+      document.getElementById("nrEmp").value);
+      submittedTasks.push(newTask);
+      submittedTaskCounter+=1;
+    };
   };
 
-  document.getElementById("editTask").onclick = () => {
-    console.log("Edit Task");
-  };
+  document.getElementById("taskOverview").onclick = () => {
+    console.log("Edit Current Task");
+      document.getElementById("taskTable").style.display = "block";
+    document.getElementById("taskTable").innerHTML =`
+      <h2>Your Tasks</h2>
+      <p>Here you can view tasks belonging to every team you manage.</p>
+      <p>Ongoing tasks are shown in green, overdue tasks are shown at the top in red.</p>
+      <hr></hr>
+      <div id="containerOverdue" class="alignItems"></div>
+      <hr></hr>
+      <div id="containerOngoing" class="alignItems"></div>`
+    function generateTasks() {
 
-  document.getElementById("viewTask").onclick = () => {
-    console.log("View Tasks");
+    const overdue = document.getElementById("containerOverdue");
+    const ongoing = document.getElementById("containerOngoing");
+        for (let i = 0; i < overdueTasks; i++) {
+            const div = document.createElement("div");
+            div.className = "boxOverdue";
+            //Text Fields
+            let title = "Overdue Task " + i;
+            let description = "Lorem ipsum"
+            let deadline = "Insert date here:"
+            let team = "Team X"
+            //final output
+            div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
+            overdue.appendChild(div);
+        }
+        for (let i = 0; i < ongoingTasks; i++) {
+            const div = document.createElement("div");
+            div.className = "boxOngoing";
+            //Text Fields
+            let title = "Task Number " + i;
+            let description = "Lorem ipsum"
+            let deadline = "Insert date here:"
+            let team = "Team X"
+            //final output
+            div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
+            ongoing.appendChild(div);
+          }
+            for (let i = 0; i < submittedTasks.length; i++) {
+              const div = document.createElement("div");
+              div.className = "boxOngoing";
+              div.innerHTML = `<div><b>${submittedTasks[i].title}</b></div><br><br>
+              ${submittedTasks[i].description}<br><br>
+              ${submittedTasks[i].deadline}<br><br>
+              ${submittedTasks[i].team}`;
+              ongoing.appendChild(div);
+            }
+        }
+        generateTasks();
+    };
+
+  document.getElementById("completedTasks").onclick = () => {
+    console.log("View Completed");
+    document.getElementById("taskTable").style.display = "block";
+    document.getElementById("taskTable").innerHTML =`
+      <h2>Your Tasks</h2>
+      <p>Here you can view the completed tasks. In the future these functions will be added:
+      - Remove completed tasks automatically after X days. - Sort tasks by time completed.</p>
+      <div id="containerCompleted" class="alignItems"></div>`
+    function generateTasks() {
+    const completed = document.getElementById("containerCompleted");
+        for (let i = 0; i < completedTasks; i++) {
+            const div = document.createElement("div");
+            div.className = "boxCompleted";
+            //Text Fields
+            let title = "Completed Task " + i;
+            let description = "Lorem ipsum"
+            let deadline = "Insert date here:"
+            let team = "Team X"
+            //final output
+            div.innerHTML = `<div><b>${title}</b></div><br><br>${description}<br><br>${deadline}<br><br>${team}`;
+            completed.appendChild(div);
+            }
+        }
+        generateTasks();
   };
 }
 
-function renderTeams() {
-  app.innerHTML = `
-    <h1>Team Management</h1>
-    <p>Manage your teams here.</p>
-
-    <button id="createTeam">Create New Team</button>
-    <button id="editTeam">Edit Teams</button>
-    <button id="viewTeams">Team Overview</button>
-  `;
-
-  document.getElementById("createTeam").onclick = () => {
-    console.log("Create Team");
-  };
-
-  document.getElementById("editTeam").onclick = () => {
-    console.log("Edit Team");
-  };
-
-  document.getElementById("viewTeams").onclick = () => {
-    console.log("View Teams");
-  };
+function task(title, description, team, deadline, empNr){
+  this.title = title
+  this.description = description
+  this.team = team
+  this.deadline = deadline
+  this.empNr = empNr
 }
