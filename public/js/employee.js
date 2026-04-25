@@ -4,12 +4,12 @@ import { logout } from "./components/logout.js";
 
 let app;
 let navbarContainer;
+let currentUser;
 
 document.addEventListener("DOMContentLoaded", async () => {
   app = document.getElementById("app");
   navbarContainer = document.getElementById("navbar");
 
-  // Get real user from session
   const res = await fetch("/api/me");
   const data = await res.json();
 
@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "/";
     return;
   }
+
+  currentUser = data.user;
 
   const navbar = await renderNavbar((route) => navigate(route));
   navbarContainer.appendChild(navbar);
@@ -33,50 +35,82 @@ function navigate(route) {
 }
 
 function render(route) {
-  switch (route) {
-    case "home":
-      app.innerHTML = `<h1>Home Page</h1>
-      <p>Hi USERNAME</p>
-      <p>Click the buttons at the top to navigate through the website.</p>
-      <h2>Your Tasks</h2>
-      <p>Here you can view your tasks.</p>
-      <p>Ongoing tasks are shown in green, completed tasks are shown in grey, and your overdue tasks are shown at the top in red.</p>
-      <hr></hr>
-      <div id="containerOverdue" class="alignItems"></div>
-      <hr></hr>
-      <div id="containerOngoing" class="alignItems"></div>
-      <hr></hr>
-      <div id="containerCompleted" class="alignItems"></div>
-      `;
-      renderTasks();
-      break;
+  const routes = {
+    home: renderHome,
+    teams: renderTeams,
+    questionnaires: renderQuestionnairesPage
+  };
 
-    /*case "tasks":
-      app.innerHTML = `<h1>Your Tasks</h1>
-      <p>Here you can view your tasks.</p>
-      <p>Ongoing tasks are shown in green, completed tasks are shown in grey.</p>
-      <div id="containerOngoing" class="alignItems"></div>
-      <div id="containerCompleted" class="alignItems"></div>
-      `;
-      renderTasks();
-      break;*/
-
-    case "teams":
-      app.innerHTML = `<h1>Your Team</h1>
-      <p>Here you can view your assigned team(s).</p>
-      <div id="containerTeam"></div>
-      `;
-      renderTeam();
-      break;
-
-    case "questionnaires":
-      app.innerHTML = "<h1>Loading questionnaires...</h1>";
-      renderQuestionnaires(app);
-      break;
-
-    default: // if no route found
-      app.innerHTML = `<h1>404</h1>`;
+  if (routes[route]) {
+    routes[route]();
+  } else {
+    app.innerHTML = `<h1>404</h1>`;
   }
+}
+
+function renderHome() {
+  const username = currentUser?.username || "User";
+
+  app.innerHTML = `
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Welcome back, ${username}</p>
+    </div>
+
+    <div class="card">
+      <h2>Your Tasks</h2>
+      <p class="muted">
+        Ongoing (green), completed (gray), overdue (red)
+      </p>
+    </div>
+
+    <div class="task-section">
+      <h3>Overdue</h3>
+      <div id="containerOverdue" class="grid"></div>
+    </div>
+
+    <div class="task-section">
+      <h3>Ongoing</h3>
+      <div id="containerOngoing" class="grid"></div>
+    </div>
+
+    <div class="task-section">
+      <h3>Completed</h3>
+      <div id="containerCompleted" class="grid"></div>
+    </div>
+  `;
+
+  renderTasks();
+}
+
+function renderTeams() {
+  app.innerHTML = `
+    <div class="page-header">
+      <h1>Your Team</h1>
+      <p class="muted">View your assigned team(s)</p>
+    </div>
+
+    <div class="card">
+      <div id="containerTeam"></div>
+    </div>
+  `;
+
+  renderTeam();
+}
+
+function renderQuestionnairesPage() {
+  app.innerHTML = `
+    <div class="page-header">
+      <h1>Questionnaires</h1>
+      <p class="muted">Manage and complete questionnaires</p>
+    </div>
+
+    <div class="card">
+      <p>Loading questionnaires...</p>
+    </div>
+  `;
+
+  renderQuestionnaires(app);
 }
 
 //DO NOT MOVE THESE. THESE WILL BE EDITED LATER TO TAKE INPUT FROM SERVER.

@@ -197,9 +197,8 @@ app.post("/api/questionnaires", async (req, res) => {
   }
 
   try {
-    // find manager record if exists
     const manager = await prisma.manager.findUnique({
-      where: { userId: req.session.user.id }
+      where: { userId: req.session.user.id },
     });
 
     if (!manager) {
@@ -213,18 +212,20 @@ app.post("/api/questionnaires", async (req, res) => {
         questions: {
           create: questions.map(q => ({
             text: q.text,
-            parameterId: q.parameterId
-          }))
-        }
+            parameterId: q.parameterId,
+          })),
+        },
       },
-      include: { questions: true }
+      include: {
+        questions: true,
+      },
     });
 
     res.json({ success: true, questionnaire });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to send Questionnaire" });
+    res.status(500).json({ error: "Failed to create questionnaire" });
   }
 });
 
@@ -239,6 +240,42 @@ app.get("/api/questionnaires", async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch" });
+  }
+});
+
+app.post("/api/response", async (req, res) => {
+  const { answers } = req.body;
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!employee) {
+      return res.status(403).json({ error: "Not an employee" });
+    }
+
+    // bulk insert
+    const data = answers.map(a => ({
+      employeeId: employee.id,
+      questionId: a.questionId,
+      value: a.value,
+    }));
+
+    await prisma.response.createMany({
+      data,
+      skipDuplicates: true,
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save responses" });
   }
 });
 
@@ -273,6 +310,24 @@ app.get("/api/me", (req, res) => {
     authenticated: true,
     user: req.session.user
   });
+});
+
+// Get employee
+app.get("/api/employee", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    res.json({ success: true, employee });
+
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch" });
+  }
 });
 
 // Routing

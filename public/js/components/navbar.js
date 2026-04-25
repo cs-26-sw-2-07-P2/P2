@@ -40,27 +40,44 @@ export async function renderNavbar(navigate) {
   const navbar = document.createElement("div");
   navbar.className = "topnav";
 
+  const left = document.createElement("div");
+  left.className = "nav-left";
+
   config.links.forEach(link => {
     const a = document.createElement("a");
     a.textContent = link.text;
 
     a.addEventListener("click", () => {
+      document.querySelectorAll(".nav-left a").forEach(el => el.classList.remove("active"));
+      a.classList.add("active");
       navigate(link.route);
     });
 
-    navbar.appendChild(a);
+    left.appendChild(a);
   });
 
-  const logoutBtn = document.createElement("a");
+  // RIGHT SIDE (user + logout)
+  const right = document.createElement("div");
+  right.className = "nav-right";
+
+  const userInfo = document.createElement("span");
+  userInfo.className = "nav-user";
+  userInfo.textContent = `${user.username} (${user.role})`;
+
+  const logoutBtn = document.createElement("button");
+  logoutBtn.className = "btn-logout";
   logoutBtn.textContent = "Logout";
-  logoutBtn.id = "logout";
 
   logoutBtn.addEventListener("click", async () => {
     await fetch("/logout", { method: "POST" });
     window.location.href = "/";
   });
 
-  navbar.appendChild(logoutBtn);
+  right.appendChild(userInfo);
+  right.appendChild(logoutBtn);
+
+  navbar.appendChild(left);
+  navbar.appendChild(right);
 
   return navbar;
 }
