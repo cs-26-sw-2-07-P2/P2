@@ -64,6 +64,8 @@ export async function renderQuestionnaires(container) {
       q.questions.forEach((item) => {
         const row = table.insertRow();
 
+        row.dataset.questionId = item.id;
+
         row.innerHTML = `
           <td>${item.text}</td>
           <td>
@@ -129,38 +131,32 @@ async function saveAnswers(table) {
     return;
   }
 
-  const id = employee.id;
-  const questions = [];
+  const answers = [];
 
   const rows = table.querySelectorAll("tr");
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
 
-    const question = row.cells[0].innerText;
     const slider = row.querySelector(".slider");
-
     if (!slider) continue;
 
-    questions.push({
-      question,
-      answer: Number(slider.value)
+    answers.push({
+      questionId: Number(row.dataset.questionId),
+      value: Number(slider.value),
     });
   }
-
-  const payload = { id, questions };
 
   const response = await fetch("/api/response", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ answers }),
   });
 
   const result = await response.json();
 
   if (response.ok) {
     alert("Saved!");
-    await loadSavedQuestionnaire();
   } else {
     console.error(result.error);
   }

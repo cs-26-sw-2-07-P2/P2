@@ -97,13 +97,13 @@ model Question {
 model Response {
   id Int @id @default(autoincrement())
 
-  value Int // 1–5 answer scale
+  value Int
 
   employeeId Int
   questionId Int
 
-  employee Employee @relation(fields: [employeeId], references: [id])
-  question Question @relation(fields: [questionId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([employeeId, questionId])
 }
