@@ -72,16 +72,9 @@ export async function renderQuestionnaires(container) {
         row.innerHTML = `
           <td>${item.text}</td>
           <td>
-            <select>
-              <option value=1>1 - Strongly Disagree</option>
-              <option value=2>2 - Disagree</option>
-              <option value=3>3 - Neutral</option>
-              <option value=4>4 - Agree</option>
-              <option value=5>5 - Strongly Agree</option>
-            </select>
-          </td>
-          <td>
-            // To do slider
+            <div class="slidecontainer">
+              <input type="range" min="1" max="5" value="1" class="slider" id="myRange">
+            </div>
           </td>
         `;
       });
@@ -140,8 +133,8 @@ async function saveAnswers(){
     window.location.href = "/";
     return;
   }
+
   const id = employee.id;
-  
   const questions = [];
 
   for (let i = 1; i < table.rows.length; i++) {
@@ -167,8 +160,6 @@ async function saveAnswers(){
     console.error(result.error);
   }
 
-
-  
   console.log(questions);
 }
 

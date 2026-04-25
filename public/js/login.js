@@ -5,34 +5,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function renderLoginPage(container) { 
     container.innerHTML = 
-    `<div id="loginBody">
-    <form id="loginForm">
-      <h2>Login</h2>
-      <label for="username"><b>Username</b></label>
-      <input
-        id="username"
-        type="text"
-        placeholder="Enter Username"
-        name="username"
-        required
-      />
+    `<div class="auth">
+  <form class="auth-card" id="loginForm">
+    <h2>Welcome back</h2>
+    <p class="auth-subtitle">Login to your account</p>
 
-      <label for="password"><b>Password</b></label>
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter Password"
-        name="password"
-        required
-      />
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input id="username" type="text" placeholder="Enter username" required />
+    </div>
 
-      <button type="submit">Login</button>
-      <button id="registerButton" type="button">Register</button>
-      <label>
-        <input type="checkbox" checked="checked" name="remember" /> Remember me?
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Enter password" required />
+    </div>
+
+    <div class="form-options">
+      <label class="checkbox">
+        <input type="checkbox" checked />
+        Remember me
       </label>
-    </form>
-    </div>`;
+    </div>
+
+    <button type="submit" class="btn-primary">Login</button>
+
+    <button id="registerButton" type="button" class="btn-secondary">
+      Create account
+    </button>
+  </form>
+</div>`;
 
   document.getElementById("registerButton").addEventListener("click", () => {
   window.location.href = "/register";

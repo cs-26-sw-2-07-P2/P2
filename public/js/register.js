@@ -41,33 +41,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function renderRegisterPage(container) {
     container.innerHTML = 
-    `<div id="registerBody">
-    <form id="registerForm">
-      <h2>Register</h2>
-      <label for="username"><b>Username</b></label>
-      <input
-        id="username"
-        type="text"
-        placeholder="Enter Username"
-        name="username"
-        required
-      />
+    `<div class="auth">
+  <form class="auth-card" id="registerForm">
+    <h2>Create account</h2>
+    <p class="auth-subtitle">Get started in seconds</p>
 
-      <label for="password"><b>Password</b></label>
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter Password"
-        name="password"
-        required
-      />
+    <div class="form-group">
+      <label>Username</label>
+      <input id="username" type="text" placeholder="Enter username" required />
+    </div>
 
-      <label for="password"><b>Confirm Password</b></label>
+    <div class="form-group">
+      <label>Password</label>
+      <input id="password" type="password" placeholder="Enter password" required />
+    </div>
+
+    <div class="form-group">
+      <label>Confirm password</label>
       <input id="confirmPassword" type="password" placeholder="Confirm password" />
+    </div>
 
-      <label><input type="checkbox" id="isManager" />Register as manager</label>
+    <label class="checkbox">
+      <input type="checkbox" id="isManager" />
+      Register as manager
+    </label>
 
-      <button type="submit">Register</button>
-    </form>
-    </div>`;
+    <button type="submit" class="btn-primary">Register</button>
+  </form>
+</div>`;
 };
