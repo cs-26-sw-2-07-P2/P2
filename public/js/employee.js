@@ -37,7 +37,7 @@ function navigate(route) {
 function render(route) {
   const routes = {
     home: renderHome,
-    teams: renderTeams,
+    team: renderTeams,
     questionnaires: renderQuestionnairesPage
   };
 
