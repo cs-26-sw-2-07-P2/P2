@@ -174,7 +174,7 @@ function renderTasks() {
           }
             for (let i = 0; i < submittedTasks.length; i++) {
               const div = document.createElement("div");
-              div.className = "boxOngoing";
+              div.className = "box ongoing";
               div.innerHTML = `<div><b>${submittedTasks[i].title}</b></div><br><br>
               ${submittedTasks[i].description}<br><br>
               ${submittedTasks[i].deadline}<br><br>
