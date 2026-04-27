@@ -150,7 +150,7 @@ function renderTasks() {
     const ongoing = document.getElementById("containerOngoing");
         for (let i = 0; i < overdueTasks; i++) {
             const div = document.createElement("div");
-            div.className = "boxOverdue";
+            div.className = "box overdue";
             //Text Fields
             let title = "Overdue Task " + i;
             let description = "Lorem ipsum"
@@ -162,7 +162,7 @@ function renderTasks() {
         }
         for (let i = 0; i < ongoingTasks; i++) {
             const div = document.createElement("div");
-            div.className = "boxOngoing";
+            div.className = "box ongoing";
             //Text Fields
             let title = "Task Number " + i;
             let description = "Lorem ipsum"
@@ -197,7 +197,7 @@ function renderTasks() {
     const completed = document.getElementById("containerCompleted");
         for (let i = 0; i < completedTasks; i++) {
             const div = document.createElement("div");
-            div.className = "boxCompleted";
+            div.className = "box completed";
             //Text Fields
             let title = "Completed Task " + i;
             let description = "Lorem ipsum"

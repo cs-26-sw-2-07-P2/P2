@@ -233,9 +233,9 @@ th {
   border-left: 6px solid;
 }
 
-.box.ongoing { border-color: var(--color-success); }
-.box.completed { border-color: #9ca3af; }
-.box.overdue { border-color: var(--color-error); }
+.box.ongoing { border-color: var(--color-success); margin-bottom: 10px; margin-left: 10px;}
+.box.completed { border-color: #9ca3af; margin-bottom: 10px; margin-left: 10px;}
+.box.overdue { border-color: var(--color-error); margin-bottom: 10px; margin-left: 10px;}
 
 .empQuestionnaire {
   color: rgb(0, 0, 0); 
