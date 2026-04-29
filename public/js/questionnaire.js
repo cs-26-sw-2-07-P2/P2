@@ -27,20 +27,26 @@ export async function renderQuestionnairePage(container) {
   document.getElementById("clearQuestionnaire").onclick = clearQuestionnaire;
 }
 
-// EMPLOYEE QUESTIONNAIRES
+// EMPLOYEE QUESTIONNAIRE (single)
 export async function renderQuestionnaires(container) {
   try {
     const response = await fetch("/api/questionnaires");
 
     if (!response.ok) {
-      container.innerHTML = "<h1>Server error loading questionnaires</h1>";
+      container.innerHTML = "<h1>Server error loading questionnaire</h1>";
       return;
     }
 
     const result = await response.json();
+    const q = result.questionnaires;
+
+    if (!q) {
+      container.innerHTML = "<h1>No questionnaire found</h1>";
+      return;
+    }
 
     const wrapper = document.createElement("div");
-    wrapper.innerHTML = `<h1>Questionnaires</h1>`;
+    wrapper.innerHTML = `<h1>Questionnaire</h1>`;
 
     const listContainer = document.createElement("div");
     wrapper.appendChild(listContainer);
@@ -48,59 +54,57 @@ export async function renderQuestionnaires(container) {
     container.innerHTML = "";
     container.appendChild(wrapper);
 
-    result.questionnaires.forEach((q) => {
-      const box = document.createElement("div");
-      box.className = "questionnaireBox";
+    const box = document.createElement("div");
+    box.className = "questionnaireBox";
 
-      const table = document.createElement("table");
+    const table = document.createElement("table");
 
-      table.innerHTML = `
-        <tr>
-          <th>Question</th>
-          <th>Answer</th>
-        </tr>
+    table.innerHTML = `
+      <tr>
+        <th>Question</th>
+        <th>Answer</th>
+      </tr>
+    `;
+
+    q.questions.forEach((item) => {
+      const row = table.insertRow();
+
+      row.dataset.questionId = item.id;
+
+      row.innerHTML = `
+        <td>${item.text}</td>
+        <td>
+          <div class="slidecontainer">
+            <input type="range" min="1" max="5" value="1" class="slider">
+            <span class="slider-value">1</span>
+          </div>
+        </td>
       `;
 
-      q.questions.forEach((item) => {
-        const row = table.insertRow();
+      const slider = row.querySelector(".slider");
+      const output = row.querySelector(".slider-value");
 
-        row.dataset.questionId = item.id;
-
-        row.innerHTML = `
-          <td>${item.text}</td>
-          <td>
-            <div class="slidecontainer">
-              <input type="range" min="1" max="5" value="1" class="slider">
-              <span class="slider-value">1</span>
-            </div>
-          </td>
-        `;
-
-        const slider = row.querySelector(".slider");
-        const output = row.querySelector(".slider-value");
-
-        slider.addEventListener("input", () => {
-          output.textContent = slider.value;
-        });
+      slider.addEventListener("input", () => {
+        output.textContent = slider.value;
       });
-
-      box.innerHTML = `<h2>${q.title}</h2>`;
-      box.appendChild(table);
-
-      const button = document.createElement("button");
-      button.textContent = "Save Answers";
-
-      button.addEventListener("click", () => {
-        saveAnswers(table);
-      });
-
-      box.appendChild(button);
-      listContainer.appendChild(box);
     });
+
+    box.innerHTML = `<h2>${q.title}</h2>`;
+    box.appendChild(table);
+
+    const button = document.createElement("button");
+    button.textContent = "Save Answers";
+
+    button.addEventListener("click", () => {
+      saveAnswers(table);
+    });
+
+    box.appendChild(button);
+    listContainer.appendChild(box);
 
   } catch (err) {
     console.error(err);
-    container.innerHTML = "<h1>Error loading questionnaires</h1>";
+    container.innerHTML = "<h1>Error loading questionnaire</h1>";
   }
 }
 
@@ -209,16 +213,23 @@ async function sendQuestionnaire() {
   const questions = [];
 
   for (let i = 1; i < table.rows.length; i++) {
-    const text = table.rows[i].cells[0].querySelector("input").value;
-    const parameterId =
-      table.rows[i].cells[1].querySelector("select").value;
+    const row = table.rows[i];
 
-    if (text.trim()) {
-      questions.push({
-        text: text.trim(),
-        parameterId: Number(parameterId),
-      });
-    }
+    const input = row.cells[0]?.querySelector("input");
+    const select = row.cells[1]?.querySelector("select");
+
+    if (!input || !select) continue;
+
+    const text = input.value.trim();
+    const parameterId = Number(select.value);
+
+    if (!text) continue;
+
+    questions.push({
+      id: row.dataset.questionId || null, // IMPORTANT for old questions
+      text,
+      parameterId,
+    });
   }
 
   const payload = { title, questions };
@@ -239,7 +250,7 @@ async function sendQuestionnaire() {
   }
 }
 
-// LOAD QUESTIONNAIRES (Manager view)
+// LOAD QUESTIONNAIRE (Manager view - single)
 async function loadSavedQuestionnaire() {
   clearQuestionnaire();
 
@@ -252,28 +263,34 @@ async function loadSavedQuestionnaire() {
       return;
     }
 
+    const q = result.questionnaires;
+
+    if (!q) return;
+
     const table = document.getElementById("questionnaire");
 
-    result.questionnaires.forEach((q) => {
-      const titleRow = table.insertRow(-1);
-      titleRow.innerHTML = `
-        <td colspan="3"><strong>${q.title}</strong></td>
+    // title
+    const titleRow = table.insertRow(-1);
+    titleRow.innerHTML = `
+      <td colspan="3"><strong>${q.title}</strong></td>
+    `;
+
+    // questions
+    q.questions.forEach((item) => {
+      const row = table.insertRow(-1);
+
+      row.dataset.questionId = item.id; // remember old questions
+
+      row.innerHTML = `
+        <td><input type="text" value="${item.text}"></td>
+        <td><select>${addDropDownOptions(item.parameterId)}</select></td>
+        <td><button class="deleteRow">Delete</button></td>
       `;
 
-      q.questions.forEach((item) => {
-        const row = table.insertRow(-1);
-
-        row.innerHTML = `
-          <td><input type="text" value="${item.text}"></td>
-          <td><select>${addDropDownOptions("")}</select></td>
-          <td><button class="deleteRow">Delete</button></td>
-        `;
-
-        row.querySelector(".deleteRow").onclick = () => row.remove();
-      });
+      row.querySelector(".deleteRow").onclick = () => row.remove();
     });
 
-    alert("Loaded questionnaires!");
+    alert("Loaded questionnaire!");
   } catch (err) {
     console.error(err);
   }

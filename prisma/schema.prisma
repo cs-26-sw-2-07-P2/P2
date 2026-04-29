@@ -91,21 +91,31 @@ model Question {
   questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id])
   parameter     Parameter     @relation(fields: [parameterId], references: [id])
 
-  responses Response[]
+  answers Answer[]
 }
 
 model Response {
   id Int @id @default(autoincrement())
 
-  value Int
-
-  employeeId Int
-  questionId Int
+  employeeId Int @unique // ONE response per employee
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  answers Answer[]
+}
+
+model Answer {
+  id Int @id @default(autoincrement())
+
+  value Int
+
+  responseId Int
+  questionId Int
+
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-  @@unique([employeeId, questionId])
+  @@unique([responseId, questionId]) // one answer per question
 }
 
 enum Role {

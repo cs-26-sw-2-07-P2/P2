@@ -245,7 +245,10 @@ app.post("/api/questionnaires", async (req, res) => {
 // Allow you to get the current questionnaire
 app.get("/api/questionnaires", async (req, res) => {
   try {
-    const questionnaires = await prisma.questionnaire.findUnique({ where: { id: 1 }, include: { questions: true } });
+    const questionnaires = await prisma.questionnaire.findUnique({
+    where: { id: SINGLETON_ID },
+    include: { questions: true }
+  });
 
     res.json({ success: true, questionnaires });
 
@@ -270,16 +273,28 @@ app.post("/api/response", async (req, res) => {
       return res.status(403).json({ error: "Not an employee" });
     }
 
-    // bulk insert
-    const data = answers.map(a => ({
-      employeeId: employee.id,
-      questionId: a.questionId,
-      value: a.value,
-    }));
-
-    await prisma.response.createMany({
-      data,
-      skipDuplicates: true,
+    const response = await prisma.response.upsert({
+      where: {
+        employeeId: employee.id,
+      },
+      update: {
+        answers: {
+          deleteMany: {}, // remove old answers
+          create: answers.map(a => ({
+            questionId: a.questionId,
+            value: a.value,
+          })),
+        },
+      },
+      create: {
+        employeeId: employee.id,
+        answers: {
+          create: answers.map(a => ({
+            questionId: a.questionId,
+            value: a.value,
+          })),
+        },
+      },
     });
 
     res.json({ success: true });
@@ -287,6 +302,37 @@ app.post("/api/response", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to save responses" });
+  }
+});
+
+app.get("/api/response", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!employee) {
+      return res.status(403).json({ error: "Not an employee" });
+    }
+
+    const response = await prisma.response.findUnique({
+      where: {
+        employeeId: employee.id, // unique field
+      },
+      include: {
+        answers: true,
+      },
+    });
+
+    res.json({ success: true, response });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch response" });
   }
 });
 
