@@ -4,6 +4,7 @@ const NAVBAR_CONFIG = {
       { text: "Home", route: "home" },
       { text: "Questionnaires", route: "questionnaires" },
       { text: "Team", route: "team" },
+      { text: "Profile", route: "profile" },
     ],
   },
   MANAGER: {
@@ -34,6 +35,10 @@ export async function renderNavbar(navigate) {
     window.location.href = "/";
     return document.createElement("div");
   }
+
+  console.log("User role:", user.role);
+  console.log("NAVBAR_CONFIG:", NAVBAR_CONFIG);
+  console.log("Config for role:", NAVBAR_CONFIG[user.role]);
 
   const config = NAVBAR_CONFIG[user.role];
 

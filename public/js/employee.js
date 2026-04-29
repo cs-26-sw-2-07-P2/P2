@@ -38,7 +38,8 @@ function render(route) {
   const routes = {
     home: renderHome,
     teams: renderTeams,
-    questionnaires: renderQuestionnairesPage
+    questionnaires: renderQuestionnairesPage,
+    profile: renderProfilePage, 
   };
 
   if (routes[route]) {
@@ -111,6 +112,75 @@ function renderQuestionnairesPage() {
   `;
 
   renderQuestionnaires(app);
+}
+
+function renderProfilePage() {
+  let name = currentUser?.username || "Not set";
+  let email = currentUser?.email || "Not set";
+  let phone = currentUser?.phone || "Not set";
+
+  app.innerHTML = `
+    <div class="page-header">
+      <h1>Your Profile</h1>
+      <p class="muted">View and edit your profile information</p>
+
+      <h2>Profile Information</h2>
+      <p><b>Name:</b> ${name}</p>
+      <p><b>Email:</b> ${email}</p>
+      <p><b>Phone:</b> ${phone}</p>
+      
+      <button id="editProfileBtn" class="btn-primary">Edit Profile</button>
+    </div>
+  `;
+  
+  document.getElementById("editProfileBtn").addEventListener("click", () => {
+    showEditProfileForm(name, email, phone);
+  });
+}
+
+function showEditProfileForm(currentName, currentEmail, currentPhone) {
+  app.innerHTML = `
+    <div class="page-header">
+      <h1>Edit Profile</h1>
+      <p class="muted">Update your profile information</p>
+    </div>
+    
+    <div class="card">
+      <form id="editProfileForm">
+        <div class="form-group">
+          <label for="editName">Name:</label>
+          <input type="text" id="editName" value="${currentName}" required>
+        </div>
+        <div class="form-group">
+          <label for="editEmail">Email:</label>
+          <input type="email" id="editEmail" value="${currentEmail}" required>
+        </div>
+        <div class="form-group">
+          <label for="editPhone">Phone:</label>
+          <input type="tel" id="editPhone" value="${currentPhone}" required>
+        </div>
+        <button type="submit" class="btn-primary">Save Changes</button>
+        <button type="button" id="cancelEdit" class="btn-secondary">Cancel</button>
+      </form>
+    </div>
+  `;
+  
+  document.getElementById("cancelEdit").addEventListener("click", () => {
+    renderProfilePage();
+  });
+  
+ document.getElementById("editProfileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Save to currentUser so changes persist
+  currentUser.name = document.getElementById("editName").value;
+  currentUser.email = document.getElementById("editEmail").value;
+  currentUser.phone = document.getElementById("editPhone").value;
+
+  console.log("Profile updated:", currentUser);
+  alert("Profile updated successfully!");
+  renderProfilePage();
+});
 }
 
 //DO NOT MOVE THESE. THESE WILL BE EDITED LATER TO TAKE INPUT FROM SERVER.
