@@ -6,7 +6,10 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
+
+// Variables
 const dev_mode = false; // only for development
+const SINGLETON_ID = 1; // id for questionnaire
 
 app.use(express.json()); // Important for json formatting (Loginpage)
 
@@ -188,7 +191,7 @@ app.get("/api/jobs", async (req, res) => {
   }
 });
 
-// Creates sent questionnaires in DB
+// Creates or overrides sent questionnaires in DB
 app.post("/api/questionnaires", async (req, res) => {
   const { title, questions } = req.body;
 
@@ -205,21 +208,31 @@ app.post("/api/questionnaires", async (req, res) => {
       return res.status(403).json({ error: "Not a manager" });
     }
 
-    const questionnaire = await prisma.questionnaire.create({
-      data: {
-        title,
-        createdById: manager.id,
-        questions: {
-          create: questions.map(q => ({
-            text: q.text,
-            parameterId: q.parameterId,
-          })),
-        },
+    const questionnaire = await prisma.questionnaire.upsert({
+    where: { id: SINGLETON_ID },
+    update: {
+      title,
+      questions: {
+        deleteMany: {}, // wipe old questions
+        create: questions.map(q => ({
+          text: q.text,
+          parameterId: q.parameterId,
+        })),
       },
-      include: {
-        questions: true,
+    },
+    create: {
+      id: SINGLETON_ID, // use same id
+      title,
+      createdById: manager.id,
+      questions: {
+        create: questions.map(q => ({
+          text: q.text,
+          parameterId: q.parameterId,
+        })),
       },
-    });
+    },
+    include: { questions: true },
+});
 
     res.json({ success: true, questionnaire });
 
@@ -229,12 +242,10 @@ app.post("/api/questionnaires", async (req, res) => {
   }
 });
 
-// Allow you to get the questionnaires
+// Allow you to get the current questionnaire
 app.get("/api/questionnaires", async (req, res) => {
   try {
-    const questionnaires = await prisma.questionnaire.findMany({
-      include: { questions: true }
-    });
+    const questionnaires = await prisma.questionnaire.findUnique({ where: { id: 1 }, include: { questions: true } });
 
     res.json({ success: true, questionnaires });
 

@@ -72,7 +72,7 @@ model JobParameter {
 // QUESTIONNAIRE SYSTEM
 // ======================
 model Questionnaire {
-  id          Int      @id @default(autoincrement())
+  id          Int      @id // There can only be one quesitonnaire
   title       String
   createdAt   DateTime @default(now())
   createdById Int
