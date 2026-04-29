@@ -208,33 +208,74 @@ app.post("/api/questionnaires", async (req, res) => {
       return res.status(403).json({ error: "Not a manager" });
     }
 
+    // ensure singleton exists first
     const questionnaire = await prisma.questionnaire.upsert({
-    where: { id: SINGLETON_ID },
-    update: {
-      title,
-      questions: {
-        deleteMany: {}, // wipe old questions
-        create: questions.map(q => ({
-          text: q.text,
-          parameterId: q.parameterId,
-        })),
+      where: { id: SINGLETON_ID },
+      update: { title }, // If questionnaire already exists → only update title
+      create: {
+        id: SINGLETON_ID,
+        title,
+        createdById: manager.id,
       },
-    },
-    create: {
-      id: SINGLETON_ID, // use same id
-      title,
-      createdById: manager.id,
-      questions: {
-        create: questions.map(q => ({
-          text: q.text,
-          parameterId: q.parameterId,
-        })),
-      },
-    },
-    include: { questions: true },
-});
+    });
 
-    res.json({ success: true, questionnaire });
+    // Normalize incoming data
+    // Convert datatypes (Prisma requirement)
+    const normalized = questions.map(q => ({
+      id: q.id ? Number(q.id) : null,
+      text: q.text,
+      parameterId: Number(q.parameterId),
+    }));
+
+    // Extract IDs that already exist in DB (for update/delete logic)
+    const incomingIds = normalized
+      .filter(q => q.id)
+      .map(q => q.id);
+
+    // Delete removed questions
+    await prisma.question.deleteMany({
+      where: {
+        questionnaireId: SINGLETON_ID,
+        id: {
+          notIn: incomingIds.length ? incomingIds : [-1],
+        },
+      },
+    });
+
+    // Update existing questions
+    await Promise.all(
+      normalized
+        .filter(q => q.id) // Only questions that already exist in DB
+        .map(q =>
+          prisma.question.update({
+            where: { id: q.id },
+            data: {
+              text: q.text,
+              parameterId: q.parameterId,
+            },
+          })
+        )
+    );
+
+    // Create new questions
+    await prisma.question.createMany({
+      data: normalized
+        .filter(q => !q.id) // Only new questions (no ID yet)
+        .map(q => ({
+          text: q.text,
+          parameterId: q.parameterId,
+          questionnaireId: SINGLETON_ID,
+        })),
+    });
+
+    // Return updated result
+    const updated = await prisma.questionnaire.findUnique({
+      where: { id: SINGLETON_ID },
+      include: { questions: true },
+      // Fetch full updated questionnaire from DB
+    });
+
+    res.json({ success: true, questionnaire: updated });
 
   } catch (error) {
     console.error(error);

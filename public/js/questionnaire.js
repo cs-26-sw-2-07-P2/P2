@@ -267,6 +267,7 @@ async function loadSavedQuestionnaire() {
 
     if (!q) return;
 
+    document.getElementById("questionnaireTitle").value = q.title;
     const table = document.getElementById("questionnaire");
 
     // title
