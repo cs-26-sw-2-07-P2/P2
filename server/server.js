@@ -138,6 +138,21 @@ app.get("/api/parameters", async (req, res) => {
   }
 });
 
+// Send and update parameters in DB
+app.post("/api/parameters", async (req, res) => {
+    const { parameters } = req.body;
+
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+  try {
+    
+  } catch (error) {
+    
+  }
+})
+
 app.post("/api/jobs", async (req, res) => {
   const { name, parameters } = req.body;
 
