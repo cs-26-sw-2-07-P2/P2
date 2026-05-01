@@ -5,7 +5,7 @@
 // Algorithm.js should provide the following data for each employee:
 // {
 //     "employeeId": 1,
-//     "name": "John Doe",
+//     "name": "Example 1",
 //     "answers": {
 //         "workingOutside": 0.8,
 //         "customerInteraction": 0.6,
