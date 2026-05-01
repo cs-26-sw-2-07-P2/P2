@@ -145,11 +145,11 @@ app.post("/api/parameters", async (req, res) => {
     if (!req.session.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-
   try {
-    
+    console.log("Test") // Insertion to add parameters in DB
   } catch (error) {
-    
+    console.error(err);
+    res.status(500).json({ error: "Failed to create parameters" });
   }
 })
 

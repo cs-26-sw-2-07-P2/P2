@@ -86,12 +86,10 @@ async function saveParameters() {
     const row = table.rows[i];
 
     const input = row.cells[0]?.querySelector("input");
-    const select = row.cells[1]?.querySelector("select");
 
     if (!input) continue;
 
     const name = input.value.trim();
-    const parameterId = Number(select.value);
 
     if (!name) continue;
 
@@ -103,7 +101,7 @@ async function saveParameters() {
 
   const payload = { parameters };
 
-  const response = await fetch("/api/questionnaires", {
+  const response = await fetch("/api/parameters", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
