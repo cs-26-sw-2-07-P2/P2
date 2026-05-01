@@ -10,6 +10,7 @@ const NAVBAR_CONFIG = {
     links: [
       { text: "Home", route: "home" },
       { text: "Tasks", route: "tasks" },
+      { text: "Parameters", route: "parameters" },
       { text: "Departments", route: "departments" },
       { text: "Questionnaires", route: "questionnaires" },
     ],

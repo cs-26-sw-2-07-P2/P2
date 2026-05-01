@@ -1,6 +1,7 @@
 import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
 import { renderDepartmentsPage } from "./departments.js";
+import { renderParametersPage } from "./parameters.js";
 import { logout } from "./components/logout.js";
 
 let app;
@@ -43,6 +44,10 @@ function render(route) {
 
     case "tasks":
       renderTasks();
+      break;
+    
+    case "parameters":
+      renderParametersPage(app);
       break;
 
     case "departments":
