@@ -8,6 +8,7 @@ export async function renderQuestionnairePage(container) {
     <button id="saveQuestionnaire">Save</button>
     <button id="loadSavedQuestionnaire">Load</button>
     <button id="clearQuestionnaire">Clear</button>
+    <button id="deleteQuestionnaire">Delete</button>
 
     <br></br>
     <input id="questionnaireTitle" placeholder="Enter questionnaire title" />
@@ -25,6 +26,7 @@ export async function renderQuestionnairePage(container) {
   document.getElementById("saveQuestionnaire").onclick = sendQuestionnaire;
   document.getElementById("loadSavedQuestionnaire").onclick = loadSavedQuestionnaire;
   document.getElementById("clearQuestionnaire").onclick = clearQuestionnaire;
+  document.getElementById("deleteQuestionnaire").onclick = deleteQuestionnaire;
 }
 
 // EMPLOYEE QUESTIONNAIRE (single)
@@ -294,5 +296,29 @@ async function loadSavedQuestionnaire() {
     alert("Loaded questionnaire!");
   } catch (err) {
     console.error(err);
+  }
+}
+
+async function deleteQuestionnaire() {
+  const confirmed = confirm("Are you sure you want to delete this questionnaire? This cannot be undone.");
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch("/api/questionnaires", {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      console.log(result.error);
+      return;
+    }
+    
+    alert("Questionnaire succesfully deleted");
+    loadSavedQuestionnaire();
+    
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete questionnaire!");
   }
 }

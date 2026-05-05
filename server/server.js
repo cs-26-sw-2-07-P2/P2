@@ -393,6 +393,41 @@ app.get("/api/questionnaires", async (req, res) => {
   }
 });
 
+// delete questionnaire and questions
+app.delete("/api/questionnaires", async (req, res) => {
+    if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+    
+    // Delete questions first
+    await prisma.question.deleteMany({
+      where: {
+        questionnaireId: SINGLETON_ID,
+      },
+    });
+
+    // Delete the questionnaire itself
+    await prisma.questionnaire.delete({
+      where: { id: SINGLETON_ID },
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete questionnaire" });
+  }
+});
+
 app.post("/api/response", async (req, res) => {
   const { answers } = req.body;
 
