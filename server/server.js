@@ -6,7 +6,10 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
+
+// Variables
 const dev_mode = false; // only for development
+const SINGLETON_ID = 1; // id for questionnaire
 
 app.use(express.json()); // Important for json formatting (Loginpage)
 
@@ -135,6 +138,101 @@ app.get("/api/parameters", async (req, res) => {
   }
 });
 
+// Send and update parameters in DB
+app.post("/api/parameters", async (req, res) => {
+    const { parameters } = req.body;
+
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    // Normalize incoming data
+    const normalized = parameters.map(p => ({
+      id: p.id ? Number(p.id) : null,
+      name: p.name,
+    }));
+
+    // Extract IDs that exist (used for delete filtering)
+    const incomingIds = normalized
+      .filter(p => p.id)
+      .map(p => p.id);
+
+    // Find out which parameters can be savely deleted
+   const toDelete = await prisma.parameter.findMany({
+      where: {
+        id: {
+          notIn: incomingIds.length ? incomingIds : [-1],
+        },
+      },
+      include: {
+        questions: true,
+        jobParameters: true,
+      },
+    });
+
+    // Check which parameters are used in questions or jobParameters
+    const blocked = toDelete.filter(
+      p => p.questions.length > 0 || p.jobParameters.length > 0
+    );
+
+    // Inform manager that some parameters can't be savely deleted
+    if (blocked.length > 0) {
+      return res.status(400).json({
+        error: "Some parameters are in use and cannot be deleted",
+        blocked: blocked.map(p => p.name),
+      });
+    }
+
+    // Delete the removed parameters (Not in use)
+    await prisma.parameter.deleteMany({
+      where: {
+        id: {
+          notIn: incomingIds.length ? incomingIds : [-1],
+        },
+      },
+    });
+
+    // Update existing parameters
+    await Promise.all(
+      normalized
+      .filter(p => p.id)
+      .map(p =>
+        prisma.parameter.update({
+          where: { id: p.id },
+          data: { name: p.name },
+        })
+      )
+    );
+
+    // Create new parameters
+    await prisma.parameter.createMany({
+      data: normalized
+      .filter(p => !p.id)
+      .map(p => ({
+        name: p.name,
+      })),
+    });
+
+    // Return updated list
+    const updated = await prisma.parameter.findMany();
+
+    res.json({ success: true, parameters: updated });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to create parameters" });
+  }
+});
+
 app.post("/api/jobs", async (req, res) => {
   const { name, parameters } = req.body;
 
@@ -188,7 +286,42 @@ app.get("/api/jobs", async (req, res) => {
   }
 });
 
-// Creates sent questionnaires in DB
+// Delete selected departments
+app.delete("/api/jobs", async (req, res) => {
+  const { ids } = req.body;
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: "No IDs provided" });
+  }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    await prisma.job.deleteMany({
+      where: {
+        id: { in: ids }
+      }
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete department(s)" });
+  }
+});
+
+// Creates or overrides sent questionnaires in DB
 app.post("/api/questionnaires", async (req, res) => {
   const { title, questions } = req.body;
 
@@ -205,23 +338,74 @@ app.post("/api/questionnaires", async (req, res) => {
       return res.status(403).json({ error: "Not a manager" });
     }
 
-    const questionnaire = await prisma.questionnaire.create({
-      data: {
+    // ensure singleton exists first
+    const questionnaire = await prisma.questionnaire.upsert({
+      where: { id: SINGLETON_ID },
+      update: { title }, // If questionnaire already exists → only update title
+      create: {
+        id: SINGLETON_ID,
         title,
         createdById: manager.id,
-        questions: {
-          create: questions.map(q => ({
-            text: q.text,
-            parameterId: q.parameterId,
-          })),
-        },
-      },
-      include: {
-        questions: true,
       },
     });
 
-    res.json({ success: true, questionnaire });
+    // Normalize incoming data
+    // Convert datatypes (Prisma requirement)
+    const normalized = questions.map(q => ({
+      id: q.id ? Number(q.id) : null,
+      text: q.text,
+      parameterId: Number(q.parameterId),
+    }));
+
+    // Extract IDs that already exist in DB (for update/delete logic)
+    const incomingIds = normalized
+      .filter(q => q.id)
+      .map(q => q.id);
+
+    // Delete removed questions
+    await prisma.question.deleteMany({
+      where: {
+        questionnaireId: SINGLETON_ID,
+        id: {
+          notIn: incomingIds.length ? incomingIds : [-1],
+        },
+      },
+    });
+
+    // Update existing questions
+    await Promise.all(
+      normalized
+        .filter(q => q.id) // Only questions that already exist in DB
+        .map(q =>
+          prisma.question.update({
+            where: { id: q.id },
+            data: {
+              text: q.text,
+              parameterId: q.parameterId,
+            },
+          })
+        )
+    );
+
+    // Create new questions
+    await prisma.question.createMany({
+      data: normalized
+        .filter(q => !q.id) // Only new questions (no ID yet)
+        .map(q => ({
+          text: q.text,
+          parameterId: q.parameterId,
+          questionnaireId: SINGLETON_ID,
+        })),
+    });
+
+    // Return updated result
+    const updated = await prisma.questionnaire.findUnique({
+      where: { id: SINGLETON_ID },
+      include: { questions: true },
+      // Fetch full updated questionnaire from DB
+    });
+
+    res.json({ success: true, questionnaire: updated });
 
   } catch (error) {
     console.error(error);
@@ -229,17 +413,53 @@ app.post("/api/questionnaires", async (req, res) => {
   }
 });
 
-// Allow you to get the questionnaires
+// Allow you to get the current questionnaire
 app.get("/api/questionnaires", async (req, res) => {
   try {
-    const questionnaires = await prisma.questionnaire.findMany({
-      include: { questions: true }
-    });
+    const questionnaires = await prisma.questionnaire.findUnique({
+    where: { id: SINGLETON_ID },
+    include: { questions: true }
+  });
 
     res.json({ success: true, questionnaires });
 
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch" });
+  }
+});
+
+// delete questionnaire and questions
+app.delete("/api/questionnaires", async (req, res) => {
+    if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+    
+    // Delete questions first
+    await prisma.question.deleteMany({
+      where: {
+        questionnaireId: SINGLETON_ID,
+      },
+    });
+
+    // Delete the questionnaire itself
+    await prisma.questionnaire.delete({
+      where: { id: SINGLETON_ID },
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete questionnaire" });
   }
 });
 
@@ -259,16 +479,28 @@ app.post("/api/response", async (req, res) => {
       return res.status(403).json({ error: "Not an employee" });
     }
 
-    // bulk insert
-    const data = answers.map(a => ({
-      employeeId: employee.id,
-      questionId: a.questionId,
-      value: a.value,
-    }));
-
-    await prisma.response.createMany({
-      data,
-      skipDuplicates: true,
+    const response = await prisma.response.upsert({
+      where: {
+        employeeId: employee.id,
+      },
+      update: {
+        answers: {
+          deleteMany: {}, // remove old answers
+          create: answers.map(a => ({
+            questionId: a.questionId,
+            value: a.value,
+          })),
+        },
+      },
+      create: {
+        employeeId: employee.id,
+        answers: {
+          create: answers.map(a => ({
+            questionId: a.questionId,
+            value: a.value,
+          })),
+        },
+      },
     });
 
     res.json({ success: true });
@@ -276,6 +508,37 @@ app.post("/api/response", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to save responses" });
+  }
+});
+
+app.get("/api/response", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!employee) {
+      return res.status(403).json({ error: "Not an employee" });
+    }
+
+    const response = await prisma.response.findUnique({
+      where: {
+        employeeId: employee.id, // unique field
+      },
+      include: {
+        answers: true,
+      },
+    });
+
+    res.json({ success: true, response });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch response" });
   }
 });
 

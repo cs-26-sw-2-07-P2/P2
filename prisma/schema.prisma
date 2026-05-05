@@ -60,9 +60,9 @@ model JobParameter {
   jobId       Int
   parameterId Int
 
-  weight Int // 1–5 importance
+  weight Int // 1-5 importance
 
-  job       Job       @relation(fields: [jobId], references: [id])
+  job       Job       @relation(fields: [jobId], references: [id], onDelete: Cascade) // Cascade = Delete if Job/Department is deleted.
   parameter Parameter @relation(fields: [parameterId], references: [id])
 
   @@unique([jobId, parameterId])
@@ -72,7 +72,7 @@ model JobParameter {
 // QUESTIONNAIRE SYSTEM
 // ======================
 model Questionnaire {
-  id          Int      @id @default(autoincrement())
+  id          Int      @id // There can only be one quesitonnaire
   title       String
   createdAt   DateTime @default(now())
   createdById Int
@@ -91,21 +91,31 @@ model Question {
   questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id])
   parameter     Parameter     @relation(fields: [parameterId], references: [id])
 
-  responses Response[]
+  answers Answer[]
 }
 
 model Response {
   id Int @id @default(autoincrement())
 
-  value Int
-
-  employeeId Int
-  questionId Int
+  employeeId Int @unique // ONE response per employee
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  answers Answer[]
+}
+
+model Answer {
+  id Int @id @default(autoincrement())
+
+  value Int
+
+  responseId Int
+  questionId Int
+
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-  @@unique([employeeId, questionId])
+  @@unique([responseId, questionId]) // one answer per question
 }
 
 enum Role {
