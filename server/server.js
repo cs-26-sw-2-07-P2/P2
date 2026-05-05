@@ -286,6 +286,41 @@ app.get("/api/jobs", async (req, res) => {
   }
 });
 
+// Delete selected departments
+app.delete("/api/jobs", async (req, res) => {
+  const { ids } = req.body;
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: "No IDs provided" });
+  }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    await prisma.job.deleteMany({
+      where: {
+        id: { in: ids }
+      }
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete department(s)" });
+  }
+});
+
 // Creates or overrides sent questionnaires in DB
 app.post("/api/questionnaires", async (req, res) => {
   const { title, questions } = req.body;

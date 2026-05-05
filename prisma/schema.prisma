@@ -60,9 +60,9 @@ model JobParameter {
   jobId       Int
   parameterId Int
 
-  weight Int // 1–5 importance
+  weight Int // 1-5 importance
 
-  job       Job       @relation(fields: [jobId], references: [id])
+  job       Job       @relation(fields: [jobId], references: [id], onDelete: Cascade) // Cascade = Delete if Job/Department is deleted.
   parameter Parameter @relation(fields: [parameterId], references: [id])
 
   @@unique([jobId, parameterId])
