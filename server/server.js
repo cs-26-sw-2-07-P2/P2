@@ -166,8 +166,34 @@ app.post("/api/parameters", async (req, res) => {
       .filter(p => p.id)
       .map(p => p.id);
 
-    // Delete the removed parameters
-    await prisma.parameter.deleteMany({ // will crash if a parameter is in use (foreign key constraint).
+    // Find out which parameters can be savely deleted
+   const toDelete = await prisma.parameter.findMany({
+      where: {
+        id: {
+          notIn: incomingIds.length ? incomingIds : [-1],
+        },
+      },
+      include: {
+        questions: true,
+        jobParameters: true,
+      },
+    });
+
+    // Check which parameters are used in questions or jobParameters
+    const blocked = toDelete.filter(
+      p => p.questions.length > 0 || p.jobParameters.length > 0
+    );
+
+    // Inform manager that some parameters can't be savely deleted
+    if (blocked.length > 0) {
+      return res.status(400).json({
+        error: "Some parameters are in use and cannot be deleted",
+        blocked: blocked.map(p => p.name),
+      });
+    }
+
+    // Delete the removed parameters (Not in use)
+    await prisma.parameter.deleteMany({
       where: {
         id: {
           notIn: incomingIds.length ? incomingIds : [-1],

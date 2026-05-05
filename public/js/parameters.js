@@ -109,10 +109,22 @@ async function saveParameters() {
 
   const result = await response.json();
 
-  if (response.ok) {
-    alert("Saved!");
-    await loadParameters(app);
-  } else {
-    console.error(result.error);
+  if (!response.ok) {
+    // Show blocked names nicely
+    if (result.blocked) {
+      alert(
+        "These parameters are in use and cannot be deleted:\n\n" +
+        result.blocked.join("\n")
+      );
+    } else {
+      alert(result.error || "Something went wrong");
+    }
+
+    // Reload so UI matches DB again
+    await loadParameters(app); // or your container
+    return;
   }
+
+  alert("Saved!");
+  await loadParameters(app);
 }
