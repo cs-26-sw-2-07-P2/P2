@@ -43,7 +43,7 @@ async function loadParameters(container) {
     const parameters = data.parameters;
 
     if (!parameters) {
-    container.innerHTML = "<h1>No questionnaire found</h1>";
+    container.innerHTML = "<h1>No parameters found!</h1>";
     return;
     }
 
@@ -111,7 +111,7 @@ async function saveParameters() {
 
   if (response.ok) {
     alert("Saved!");
-    await loadParameters();
+    await loadParameters(app);
   } else {
     console.error(result.error);
   }

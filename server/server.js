@@ -145,13 +145,67 @@ app.post("/api/parameters", async (req, res) => {
     if (!req.session.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+
   try {
-    console.log("Test") // Insertion to add parameters in DB
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    // Normalize incoming data
+    const normalized = parameters.map(p => ({
+      id: p.id ? Number(p.id) : null,
+      name: p.name,
+    }));
+
+    // Extract IDs that exist (used for delete filtering)
+    const incomingIds = normalized
+      .filter(p => p.id)
+      .map(p => p.id);
+
+    // Delete the removed parameters
+    await prisma.parameter.deleteMany({ // will crash if a parameter is in use (foreign key constraint).
+      where: {
+        id: {
+          notIn: incomingIds.length ? incomingIds : [-1],
+        },
+      },
+    });
+
+    // Update existing parameters
+    await Promise.all(
+      normalized
+      .filter(p => p.id)
+      .map(p =>
+        prisma.parameter.update({
+          where: { id: p.id },
+          data: { name: p.name },
+        })
+      )
+    );
+
+    // Create new parameters
+    await prisma.parameter.createMany({
+      data: normalized
+      .filter(p => !p.id)
+      .map(p => ({
+        name: p.name,
+      })),
+    });
+
+    // Return updated list
+    const updated = await prisma.parameter.findMany();
+
+    res.json({ success: true, parameters: updated });
+
   } catch (error) {
-    console.error(err);
+    console.error(error);
     res.status(500).json({ error: "Failed to create parameters" });
   }
-})
+});
 
 app.post("/api/jobs", async (req, res) => {
   const { name, parameters } = req.body;
