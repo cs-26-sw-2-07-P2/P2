@@ -1,67 +1,57 @@
-// This file will take the input of algorithm.js and will take the percentage of each paratmeter and will calculate 
-// the final score of compatibility of the user with each department and will take all scores of all employees and 
-// will distribute them into the best matching departments to ensure employee satisfaction and productivity.
+function calculateCompatibility(departments, parameters, employees) {
+    const results = [];
 
-// Algorithm.js should provide the following data for each employee:
-// {
-//     "employeeId": 1,
-//     "name": "Example 1",
-//     "answers": {
-//         "workingOutside": 4,
-//         "customerInteraction": 4,
-//         "physicalLabour": 2,
-//     }
-// }
+    // Defining the maximum and minimum values for the parameters to calculate the maximum possible difference.
+    const MAX_VALUE = 5;
+    const MIN_VALUE = 1;
+    const maxDifference = MAX_VALUE - MIN_VALUE;
 
-// Function to calculate the compatibility score for each department
-// The function will take an employeeID and the answer for each question in the questionnaire as a value from 0 to 1 representing the weight 
-// of the employee's preferences and will return a score for each department based on how well it matches the employee's preferences.
-// The function will start off by putting every employee in the department with the highest score and then will redistribute employees to other 
-// departments based on their scores to ensure that each department has a balanced number of employees and that employees are placed in departments 
-// where they are most likely to be satisfied and productive.
-// An example of how the function will work is as follows:
+    // For each department we go over every employee.
+    for (let x = 0; x < departments.length; x++) {
+        const currentDepartment = departments[x];
 
-// There will be parameters such as "Working outside", "Customer interaction", "Teamwork", "Independent work", etc. 
-// The manager will assign a fitting answer for what the ideal employee for the department should have for each parameter, for example:
-// - Operating rides: Working outside: 4, Customer interaction: 4, Teamwork: 2, Independent work: 4.
-// - Food and beverage: Working outside: 2, Customer interaction: 4, Teamwork: 4, Independent work: 2.
-// - Maintenance: Working outside: 4, Customer interaction: 1, Teamwork: 4, Independent work: 4.
+        // For each employee we calculate the compatibility with each department based on the parameters.
+        for (let y = 0; y < employees.length; y++) {
+            const currentEmployee = employees[y];
+            let accuracyScore = [];
 
-// Based on the employees' answers to the questionnaire, the function will calculate a score for each department. 
-// For example, if the employee answers a question about working outside with 4, the function will calculate the score for each 
-// department based on how closely the employee's answer matches the ideal answer for that parameter in each department.
+            // Calculate the difference for each parameter and store it in accuracyScore. The output of this loop has to be positive, so we have a few different cases to calculate the difference.
+            for (let z = 0; z < parameters.length; z++) {
+                // If the department's weight for this parameter is higher than the employee's answer, sumtract the employee's answer from the department's weight to get the difference.
+                if (currentDepartment.weight[z] > currentEmployee.answers[z]) {
+                    accuracyScore[z] = currentDepartment.weight[z] - currentEmployee.answers[z];
+                } 
+                // If the employee's answer is higher than the department's weight, subtract the department's weight from the employee's answer to get the difference.
+                else if (currentDepartment.weight[z] < currentEmployee.answers[z]) {
+                    accuracyScore[z] = currentEmployee.answers[z] - currentDepartment.weight[z];
+                } 
+                // If the values are equal, the difference is 0.
+                else {
+                    accuracyScore[z] = 0;
+                }
+            }
 
-// This means that if the employee answers 4 for working outside, 4 for customer interaction, 2 for teamwork, 
-// and 4 for independent work, the function will calculate the score for each department as follows:
-// - Operating rides: (4/4) + (4/4) + (2/2) + (4/4) = 1 + 1 + 1 + 1 = 4/4 = 1
-// - Food and beverage: (2/4) + (4/4) + (4/4) + (2/2) = 0.5 + 1 + 1 + 1 = 3.5/4 = 0.875
-// - Maintenance: (4/4) + (1/4) + (4/4) + (4/4) = 1 + 0.25 + 1 + 1 = 3.25/4 = 0.8125
+            // Calculate the accuracyScore total and average difference.
+            let total = 0;
+            for (let i = 0; i < accuracyScore.length; i++) {
+                total += accuracyScore[i];
+            }
 
-// This means that the employee has a compatibility score of:
-//  100% for Operating rides, 87.5% for Food and beverage, and 81.25% for Maintenance.
+            // Average difference, then calculate compatibility as a percentage.
+            const averageDifference = total / accuracyScore.length;
+            const compatibility = (1 - (averageDifference / maxDifference)) * 100;
 
-// department_assign.js :
-// After this the algorithm should place the employee in the department with the highest score, which in this case is Operating rides.
-// Starting off we will place all employees in the department with the highest score and then we will redistribute employees to 
-// other departments based on their scores to ensure that each department has a balanced number of employees and that employees are 
-// placed in departments where they are most likely to be satisfied and productive.
+            // Store the results for use in department_assign.js.
+            results.push({
+                employee: currentEmployee.name,
+                department: currentDepartment.name,
+                compatibility: compatibility
+            });
+        }
+    }
 
-// To start off we will hardcode the number of employees that each department can take, for example:
-// - Operating rides: 20 employees
-// - Food and beverage: 20 employees
-// - Maintenance: 20 employees
-
-// The algorithm will then place the employees in the department the highest matching score, and will not take the limit of employees 
-// in each department into consideration. After all employees are assigned we will run a check to see if any department has more than 
-// the limit of employees, if it does we will take the employees with the highest score for a department that needs more employees 
-// and we will move them to that department, and we will repeat this process until all departments have a balanced number of employees 
-// and that employees are placed in departments where they are most likely to be satisfied and productive.
-
-// In total this should give us the maximum average compatibility score for all employees across all departments, 
-// while ensuring that each department has a balanced number of employees and that employees are placed in departments where they are 
-// most likely to be satisfied and productive.
-
-const { calculateCompatibility } = require('./algorithm.js');
+    return results;
+}
 
 // Example of department and parameter data (REAL DATA SHOULD COME FROM THE DATABASE).
 const departments = [
