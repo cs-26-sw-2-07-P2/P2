@@ -28,9 +28,15 @@ async function getAlgorithmData() {
 async function Algorithm() {
     const { responses, jobs } = await getAlgorithmData();
 
+    const profiles = profileEmployees(responses);
+
     const results = calculateCompatibility(responses, jobs);
 
     distributeEmployees(results);
+}
+
+function profileEmployees(responses) {
+
 }
 
 function calculateCompatibility(responses, jobs) {
