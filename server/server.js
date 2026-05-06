@@ -511,6 +511,7 @@ app.post("/api/response", async (req, res) => {
   }
 });
 
+// Get unique response from User depending on session
 app.get("/api/response", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Unauthorized" });

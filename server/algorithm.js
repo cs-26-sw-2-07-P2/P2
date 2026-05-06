@@ -1,68 +1,39 @@
-function responseData() {
-    const res = await fetch("/api/response");
-    const data = await res.json();
+const prisma = require("./prismaClient");
 
-    const answerMap = {};
-
-    if (data.response) {
-    data.response.answers.forEach(a => {
-        answerMap[a.questionId] = a.value;
+async function getAlgorithmData() {
+    const responses = await prisma.response.findMany({
+        include: {
+            employee: {
+                include: {
+                    user: true
+                }
+            },
+            answers: true
+        }
     });
-    }
 
-    const value = answerMap[item.id] || 1;
+    const jobs = await prisma.job.findMany({
+        include: {
+            parameters: {
+                include: {
+                    parameter: true
+                }
+            }
+        }
+    });
+
+    return { responses, jobs };
 }
 
-// Example of department and parameter data (REAL DATA SHOULD COME FROM THE DATABASE).
-const departments = [
-    // Parameters: Working outside, Customer interaction, Physical labour (REAL DATA SHOULD COME FROM THE DATABASE).
-    { name: "Cleaning",    weight: [5, 2, 3], capacity: 2 },
-    { name: "Restaurant",  weight: [2, 5, 4], capacity: 2 },
-    { name: "Rides",       weight: [5, 1, 4], capacity: 4 },
-    { name: "Maintenance", weight: [2, 4, 5], capacity: 2 },
-    { name: "Minigames",   weight: [3, 4, 2], capacity: 2 },
-    { name: "Security",    weight: [4, 2, 5], capacity: 2 },
-    { name: "First Aid",   weight: [1, 5, 4], capacity: 2 },
-    { name: "Merchandise", weight: [5, 3, 3], capacity: 2 },
-    { name: "Ticketing",   weight: [2, 4, 4], capacity: 2 },
-    { name: "Parking",     weight: [4, 2, 4], capacity: 2 },
-    { name: "Cleaning",    weight: [3, 5, 3], capacity: 2 }
-];
+async function Algorithm() {
+    const { responses, jobs } = await getAlgorithmData();
 
-// Parameters that are used to calculate the compatibility score for each department (REAL DATA SHOULD COME FROM THE DATABASE).
-const parameters = ["Working outside", "Customer interaction", "Physical labour"];
+    const results = calculateCompatibility(responses, jobs);
 
-// Example of employee and parameter data (REAL DATA SHOULD COME FROM THE DATABASE).
-const employees = [
-    { name: "Emp. 1",  answers: [5, 2, 3] },
-    { name: "Emp. 2",  answers: [2, 5, 4] },
-    { name: "Emp. 3",  answers: [4, 3, 3] },
-    { name: "Emp. 4",  answers: [5, 1, 4] },
-    { name: "Emp. 5",  answers: [2, 4, 5] },
-    { name: "Emp. 6",  answers: [3, 4, 2] },
-    { name: "Emp. 7",  answers: [4, 2, 5] },
-    { name: "Emp. 8",  answers: [1, 5, 4] },
-    { name: "Emp. 9",  answers: [5, 3, 3] },
-    { name: "Emp. 10", answers: [2, 4, 4] },
-    { name: "Emp. 11", answers: [4, 2, 4] },
-    { name: "Emp. 12", answers: [2, 3, 3] },
-    { name: "Emp. 13", answers: [5, 1, 5] },
-    { name: "Emp. 14", answers: [2, 4, 3] },
-    { name: "Emp. 15", answers: [4, 3, 4] },
-    { name: "Emp. 16", answers: [1, 5, 5] },
-    { name: "Emp. 17", answers: [5, 2, 4] },
-    { name: "Emp. 18", answers: [3, 4, 4] },
-    { name: "Emp. 19", answers: [4, 3, 2] },
-    { name: "Emp. 20", answers: [2, 5, 3] },
-    { name: "Emp. 21", answers: [4, 2, 3] },
-    { name: "Emp. 22", answers: [3, 4, 5] },
-    { name: "Emp. 23", answers: [5, 1, 4] },
-    { name: "Emp. 24", answers: [2, 4, 4] },
-    { name: "Emp. 25", answers: [4, 3, 3] }
-    
-];
+    distributeEmployees(results);
+}
 
-function calculateCompatibility(departments, parameters, employees) {
+function calculateCompatibility(responses, jobs) {
     const results = [];
 
     // Defining the maximum and minimum values for the parameters to calculate the maximum possible difference.
@@ -242,8 +213,3 @@ function distributeEmployees() {
     console.log("-----------------------------------");
 
 }
-
-// Export the function so you can use it in other files.
-module.exports = { distributeEmployees };
-
-distributeEmployees();
