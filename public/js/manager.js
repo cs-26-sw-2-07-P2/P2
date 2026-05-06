@@ -2,6 +2,9 @@ import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
 import { renderDepartmentsPage } from "./departments.js";
 import { logout } from "./components/logout.js";
+export function render(route) { ... }
+export function renderTasks() { ... }
+export function renderDepartmentsPage(app) { ... }
 
 let app;
 let navbarContainer;
