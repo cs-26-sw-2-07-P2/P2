@@ -25,9 +25,49 @@ async function getAlgorithmData() {
     return { responses, jobs };
 }
 
+function displayData(responses, jobs) {
+    console.log("\n========== RESPONSES ==========\n");
+
+    responses.forEach((response) => {
+        console.log(`Response ID: ${response.id}`);
+
+        console.log(`Employee ID: ${response.employee.id}`);
+        console.log(`Username: ${response.employee.user.username}`);
+
+        console.log("Answers:");
+
+        response.answers.forEach((answer) => {
+            console.log(`  - Question ID: ${answer.questionId}`);
+            console.log(`    Value: ${answer.value}`);
+        });
+
+        console.log("-----------------------------------");
+    });
+
+    console.log("\n========== JOBS ==========\n");
+
+    jobs.forEach((job) => {
+        console.log(`Job ID: ${job.id}`);
+        console.log(`Name: ${job.name}`);
+        console.log(`Capacity: ${job.capacity}`);
+        console.log(`Current Amount: ${job.amount}`);
+
+        console.log("Parameters:");
+
+        job.parameters.forEach((param) => {
+            console.log(`  - Parameter: ${param.parameter.name}`);
+            console.log(`    Weight: ${param.weight}`);
+        });
+
+        console.log("-----------------------------------");
+    });
+}
+
 // Algorithm that utilizes 3-steps to assign departments for employees
 async function Algorithm() {
     const { responses, jobs } = await getAlgorithmData();
+
+    displayData(responses, jobs);
 
     const result = calculateCompatibility(responses, jobs);
 
@@ -36,14 +76,13 @@ async function Algorithm() {
 
 // Function to calculate each employees compatibility with certain departments
 function calculateCompatibility(responses, jobs) {
-    
 
-
-    return result;
 }
 
 // Function to distribute employees into departments based on their compatibility scores and department capacities.
-function distributeEmployees() {
+function distributeEmployees(result) {
 
 
 }
+
+Algorithm();
