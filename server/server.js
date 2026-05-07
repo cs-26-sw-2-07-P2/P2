@@ -234,7 +234,8 @@ app.post("/api/parameters", async (req, res) => {
 });
 
 app.post("/api/jobs", async (req, res) => {
-  const { name, parameters } = req.body;
+  const { name, capacity, parameters } = req.body;
+  const amountofEmployees = 0;
 
   if (!name) {
     return res.status(400).json({ error: "Name is required" });
@@ -244,6 +245,8 @@ app.post("/api/jobs", async (req, res) => {
     const job = await prisma.job.create({
       data: {
         name,
+        capacity: Number(capacity),
+        amount: amountofEmployees, // There should be no employees when initialized
         parameters: {
           create: parameters.map(p => ({
             parameterId: p.parameterId,

@@ -25,23 +25,21 @@ async function getAlgorithmData() {
     return { responses, jobs };
 }
 
+// Algorithm that utilizes 3-steps to assign departments for employees
 async function Algorithm() {
     const { responses, jobs } = await getAlgorithmData();
 
-    const profiles = profileEmployees(responses);
+    const result = calculateCompatibility(responses, jobs);
 
-    const results = calculateCompatibility(responses, jobs);
-
-    distributeEmployees(results);
+    distributeEmployees(result);
 }
 
-function profileEmployees(responses) {
-
-}
-
+// Function to calculate each employees compatibility with certain departments
 function calculateCompatibility(responses, jobs) {
+    
 
-    return results;
+
+    return result;
 }
 
 // Function to distribute employees into departments based on their compatibility scores and department capacities.
