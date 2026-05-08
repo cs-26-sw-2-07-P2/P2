@@ -1,12 +1,12 @@
 # P2 Projekt
 
-# Start database
-
-docker compose up -d
-
 # Install dependencies
 
-npm ci or npm install
+npm ci or npm install (Dont update packages)
+
+# Start/setup database
+
+docker compose up -d
 
 # Setup Prisma
 
