@@ -51,6 +51,9 @@ model Job {
   id   Int    @id @default(autoincrement())
   name String
 
+  capacity Int // Max amount of employees
+  amount   Int // Current amount of employees
+
   parameters JobParameter[]
 }
 

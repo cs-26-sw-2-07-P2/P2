@@ -34,10 +34,23 @@ function navigate(route) {
   render(route);
 }
 
-function render(route) {
+async function getCurrentUser() {
+  const res = await fetch("/api/me");
+
+  if (!res.ok) {
+    return null;
+  }
+
+  const data = await res.json();
+  return data.user;
+}
+
+async function render(route) {
+  const user = await getCurrentUser();
+
   switch (route) {
     case "home":
-      app.innerHTML = `<h1>Welcome USERNAME</h1>
+      app.innerHTML = `<h1>Welcome ${user.username}</h1>
       <p>Welcome to your manager dashboard. Here you can manage your tasks, teams and questionnaires.</p>
       <p>Use the navigation bar above to access different sections of the dashboard.</p>`;
       break;

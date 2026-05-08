@@ -13,10 +13,13 @@ export async function renderDepartmentsPage(container) {
 
     <br><br>
     <input id="DepartmentTitle" placeholder="Enter Department title" />
+    <input id="DepartmentCapacity" placeholder="Enter Department capacity" />
 
     <table id="Department">
       <tr>
         <th>Select</th>
+        <th>Department</th>
+        <th>Capacity</th>
         <th>Parameter</th>
         <th>Weight</th>
         <th>Action</th>
@@ -51,17 +54,32 @@ function addParameterOptions(selected = "") {
 function newDepartment() {
   clearDepartments();
   document.getElementById("DepartmentTitle").value = "";
+  document.getElementById("DepartmentCapacity").value = "";
 }
 
 function addParameterRow() {
+
   const table = document.getElementById("Department");
   const row = table.insertRow(-1);
 
   row.innerHTML = `
-    <td></td>
-    <td><select>${addParameterOptions()}</select></td>
-    <td><input type="number" min="1" max="5" value="3" /></td>
-    <td><button class="deleteRow">Delete</button></td>
+    <td></td> <!-- Select -->
+    <td></td> <!-- Department -->
+    <td></td> <!-- Capacity -->
+
+    <td>
+      <select>
+        ${addParameterOptions()}
+      </select>
+    </td>
+
+    <td>
+      <input type="number" min="1" max="5" value="3" />
+    </td>
+
+    <td>
+      <button class="deleteRow">Delete</button>
+    </td>
   `;
 
   row.querySelector(".deleteRow").onclick = () => row.remove();
@@ -78,6 +96,7 @@ function clearDepartments() {
 async function saveDepartment() {
   const table = document.getElementById("Department");
   const name = document.getElementById("DepartmentTitle").value;
+  const capacity = document.getElementById("DepartmentCapacity").value;
 
   if (!name.trim()) {
     alert("Enter department name");
@@ -88,8 +107,8 @@ async function saveDepartment() {
   const seen = new Set();
 
   for (let i = 1; i < table.rows.length; i++) {
-    const select = table.rows[i].cells[1]?.querySelector("select");
-    const input = table.rows[i].cells[2]?.querySelector("input");
+    const select = table.rows[i].cells[3]?.querySelector("select");
+    const input = table.rows[i].cells[4]?.querySelector("input");
 
     if (!select || !input) continue; // skip title rows
 
@@ -116,6 +135,7 @@ async function saveDepartment() {
 
   const payload = {
     name,
+    capacity,
     parameters: parametersData
   };
 
@@ -145,23 +165,52 @@ async function loadSavedDepartment() {
   const table = document.getElementById("Department");
 
   data.jobs.forEach(job => {
-    // Title row with checkbox
+
+    // Department header row
     const titleRow = table.insertRow(-1);
+
     titleRow.innerHTML = `
       <td>
         <input type="checkbox" class="deptCheckbox" value="${job.id}">
       </td>
-      <td colspan="3"><strong>${job.name}</strong></td>
+
+      <td>
+        <strong>${job.name}</strong>
+      </td>
+
+      <td colspan="3">
+        <strong>${job.capacity || 0}</strong>
+      </td>
     `;
 
+    // Parameter rows
     job.parameters.forEach(p => {
+
       const row = table.insertRow(-1);
 
       row.innerHTML = `
-        <td></td>
-        <td><select>${addParameterOptions(p.parameter.id)}</select></td>
-        <td><input type="number" min="1" max="5" value="${p.weight}" /></td>
-        <td><button class="deleteRow">Delete</button></td>
+        <td></td> <!-- Select -->
+        <td></td> <!-- Deparmtent -->
+        <td></td> <!-- Capacity -->
+
+        <td>
+          <select>
+            ${addParameterOptions(p.parameter.id)}
+          </select>
+        </td>
+
+        <td>
+          <input
+            type="number"
+            min="1"
+            max="5"
+            value="${p.weight}"
+          />
+        </td>
+
+        <td>
+          <button class="deleteRow">Delete</button>
+        </td>
       `;
 
       row.querySelector(".deleteRow").onclick = () => row.remove();
