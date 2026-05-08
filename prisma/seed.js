@@ -1,6 +1,45 @@
 const prisma = require("../server/prismaClient");
+const bcrypt = require("bcrypt");
+
+async function createEmployees(amount) {
+  for (let i = 0; i < amount; i++) {
+    const password = "123";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let username = "";
+    for (const char of chars) {
+      username += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    // check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // create user in DB
+    const user = await prisma.user.create({
+      data: {
+        username,
+        password: hashedPassword,
+        role: "EMPLOYEE",
+      },
+    });
+
+    // create role-specific profile
+    await prisma.employee.create({ data: { userId: user.id } });
+    }
+}
 
 async function main() {
+  const amountofEmployees = 20;
+
+  createEmployees(amountofEmployees);
+
   // PARAMETERS
   await prisma.parameter.createMany({
     data: [
