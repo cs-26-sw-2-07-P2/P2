@@ -15,7 +15,7 @@ async function createEmployees(amount) {
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return console.log("User already exists!");
     }
 
     // hash password
@@ -38,7 +38,7 @@ async function createEmployees(amount) {
 async function main() {
   const amountofEmployees = 20;
 
-  createEmployees(amountofEmployees);
+  await createEmployees(amountofEmployees);
 
   // PARAMETERS
   await prisma.parameter.createMany({
@@ -92,72 +92,131 @@ async function main() {
   const getJob = (name) =>
     jobs.find(j => j.name === name);
 
-  // JOB PARAMETERS
-  await prisma.jobParameter.createMany({
-    data: [
+// JOB PARAMETERS
+const jobWeights = {
+  Cleaning: {
+    "Outdoor Work": 2,
+    "Indoor Work": 5,
+    "Teamwork": 3,
+    "Problem Solving": 1,
+    "Communication skills": 2,
+    "Technical Skills": 1,
+    "Entertainment": 1,
+    "Customer Service": 2
+  },
 
-      // Cleaning
-      {
-        jobId: getJob("Cleaning").id,
-        parameterId: getParameter("Indoor Work").id,
-        weight: 5
-      },
-      {
-        jobId: getJob("Cleaning").id,
-        parameterId: getParameter("Teamwork").id,
-        weight: 2
-      },
+  "Ride Operator": {
+    "Outdoor Work": 3,
+    "Indoor Work": 2,
+    "Teamwork": 4,
+    "Problem Solving": 3,
+    "Communication skills": 5,
+    "Technical Skills": 2,
+    "Entertainment": 3,
+    "Customer Service": 5
+  },
 
-      // Ride Operator
-      {
-        jobId: getJob("Ride Operator").id,
-        parameterId: getParameter("Customer Service").id,
-        weight: 5
-      },
-      {
-        jobId: getJob("Ride Operator").id,
-        parameterId: getParameter("Communication skills").id,
-        weight: 4
-      },
+  Restaurant: {
+    "Outdoor Work": 1,
+    "Indoor Work": 5,
+    "Teamwork": 5,
+    "Problem Solving": 3,
+    "Communication skills": 4,
+    "Technical Skills": 1,
+    "Entertainment": 1,
+    "Customer Service": 5
+  },
 
-      // Restaurant
-      {
-        jobId: getJob("Restaurant").id,
-        parameterId: getParameter("Teamwork").id,
-        weight: 5
-      },
-      {
-        jobId: getJob("Restaurant").id,
-        parameterId: getParameter("Customer Service").id,
-        weight: 4
-      },
+  Security: {
+    "Outdoor Work": 4,
+    "Indoor Work": 2,
+    "Teamwork": 3,
+    "Problem Solving": 5,
+    "Communication skills": 4,
+    "Technical Skills": 2,
+    "Entertainment": 1,
+    "Customer Service": 3
+  },
 
-      // Security
-      {
-        jobId: getJob("Security").id,
-        parameterId: getParameter("Problem Solving").id,
-        weight: 5
-      },
+  Maintenance: {
+    "Outdoor Work": 3,
+    "Indoor Work": 3,
+    "Teamwork": 2,
+    "Problem Solving": 4,
+    "Communication skills": 2,
+    "Technical Skills": 5,
+    "Entertainment": 1,
+    "Customer Service": 1
+  },
 
-      // Maintenance
-      {
-        jobId: getJob("Maintenance").id,
-        parameterId: getParameter("Technical Skills").id,
-        weight: 5
-      },
+  Sales: {
+    "Outdoor Work": 1,
+    "Indoor Work": 5,
+    "Teamwork": 4,
+    "Problem Solving": 3,
+    "Communication skills": 5,
+    "Technical Skills": 2,
+    "Entertainment": 3,
+    "Customer Service": 5
+  },
 
-      // Performer
-      {
-        jobId: getJob("Perfomer").id,
-        parameterId: getParameter("Entertainment").id,
-        weight: 5
-      }
+  "Ticket Scanner": {
+    "Outdoor Work": 3,
+    "Indoor Work": 2,
+    "Teamwork": 3,
+    "Problem Solving": 2,
+    "Communication skills": 4,
+    "Technical Skills": 1,
+    "Entertainment": 2,
+    "Customer Service": 5
+  },
 
-    ],
-    skipDuplicates: true
-  });
+  "Customer Service": {
+    "Outdoor Work": 1,
+    "Indoor Work": 5,
+    "Teamwork": 4,
+    "Problem Solving": 4,
+    "Communication skills": 5,
+    "Technical Skills": 1,
+    "Entertainment": 2,
+    "Customer Service": 5
+  },
 
-  console.log("Seeded job parameters");
+  Perfomer: {
+    "Outdoor Work": 2,
+    "Indoor Work": 3,
+    "Teamwork": 4,
+    "Problem Solving": 2,
+    "Communication skills": 5,
+    "Technical Skills": 1,
+    "Entertainment": 5,
+    "Customer Service": 4
+  }
+};
+
+const jobParameterData = [];
+
+// Constructers to create jobs with parameters and their corresponding weight
+for (const [jobName, weights] of Object.entries(jobWeights)) {
+  const job = getJob(jobName);
+
+  for (const [parameterName, weight] of Object.entries(weights)) {
+    const parameter = getParameter(parameterName);
+
+    jobParameterData.push({
+      jobId: job.id,
+      parameterId: parameter.id,
+      weight
+    });
+  }
+}
+
+await prisma.jobParameter.createMany({
+  data: jobParameterData,
+  skipDuplicates: true
+});
+
+console.log("Seeded job parameters");
 
   // QUESTIONNAIRE
   const questionnaire = await prisma.questionnaire.upsert({
