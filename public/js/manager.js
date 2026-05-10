@@ -1,6 +1,7 @@
 import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
 import { renderDepartmentsPage } from "./departments.js";
+import { renderParametersPage } from "./parameters.js";
 import { logout } from "./components/logout.js";
 
 let app;
@@ -33,16 +34,33 @@ function navigate(route) {
   render(route);
 }
 
-function render(route) {
+async function getCurrentUser() {
+  const res = await fetch("/api/me");
+
+  if (!res.ok) {
+    return null;
+  }
+
+  const data = await res.json();
+  return data.user;
+}
+
+async function render(route) {
+  const user = await getCurrentUser();
+
   switch (route) {
     case "home":
-      app.innerHTML = `<h1>Welcome USERNAME</h1>
+      app.innerHTML = `<h1>Welcome ${user.username}</h1>
       <p>Welcome to your manager dashboard. Here you can manage your tasks, teams and questionnaires.</p>
       <p>Use the navigation bar above to access different sections of the dashboard.</p>`;
       break;
 
     case "tasks":
       renderTasks();
+      break;
+    
+    case "parameters":
+      renderParametersPage(app);
       break;
 
     case "departments":
@@ -150,7 +168,7 @@ function renderTasks() {
     const ongoing = document.getElementById("containerOngoing");
         for (let i = 0; i < overdueTasks; i++) {
             const div = document.createElement("div");
-            div.className = "boxOverdue";
+            div.className = "box overdue";
             //Text Fields
             let title = "Overdue Task " + i;
             let description = "Lorem ipsum"
@@ -162,7 +180,7 @@ function renderTasks() {
         }
         for (let i = 0; i < ongoingTasks; i++) {
             const div = document.createElement("div");
-            div.className = "boxOngoing";
+            div.className = "box ongoing";
             //Text Fields
             let title = "Task Number " + i;
             let description = "Lorem ipsum"
@@ -174,7 +192,7 @@ function renderTasks() {
           }
             for (let i = 0; i < submittedTasks.length; i++) {
               const div = document.createElement("div");
-              div.className = "boxOngoing";
+              div.className = "box ongoing";
               div.innerHTML = `<div><b>${submittedTasks[i].title}</b></div><br><br>
               ${submittedTasks[i].description}<br><br>
               ${submittedTasks[i].deadline}<br><br>
@@ -197,7 +215,7 @@ function renderTasks() {
     const completed = document.getElementById("containerCompleted");
         for (let i = 0; i < completedTasks; i++) {
             const div = document.createElement("div");
-            div.className = "boxCompleted";
+            div.className = "box completed";
             //Text Fields
             let title = "Completed Task " + i;
             let description = "Lorem ipsum"

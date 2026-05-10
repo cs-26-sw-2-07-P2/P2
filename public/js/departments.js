@@ -9,12 +9,17 @@ export async function renderDepartmentsPage(container) {
     <button id="saveDepartment">Save Department</button>
     <button id="loadSavedDepartment">Load Departments</button>
     <button id="clearDepartments">Clear</button>
+    <button id="deleteDepartments">Delete Department(s)</button>
 
     <br><br>
     <input id="DepartmentTitle" placeholder="Enter Department title" />
+    <input id="DepartmentCapacity" placeholder="Enter Department capacity" />
 
     <table id="Department">
       <tr>
+        <th>Select</th>
+        <th>Department</th>
+        <th>Capacity</th>
         <th>Parameter</th>
         <th>Weight</th>
         <th>Action</th>
@@ -27,6 +32,7 @@ export async function renderDepartmentsPage(container) {
   document.getElementById("saveDepartment").onclick = saveDepartment;
   document.getElementById("loadSavedDepartment").onclick = loadSavedDepartment;
   document.getElementById("clearDepartments").onclick = clearDepartments;
+  document.getElementById("deleteDepartments").onclick = deleteDepartments;
 }
 
 let parameters = [];
@@ -48,16 +54,32 @@ function addParameterOptions(selected = "") {
 function newDepartment() {
   clearDepartments();
   document.getElementById("DepartmentTitle").value = "";
+  document.getElementById("DepartmentCapacity").value = "";
 }
 
 function addParameterRow() {
+
   const table = document.getElementById("Department");
   const row = table.insertRow(-1);
 
   row.innerHTML = `
-    <td><select>${addParameterOptions()}</select></td>
-    <td><input type="number" min="1" max="5" value="3" /></td>
-    <td><button class="deleteRow">Delete</button></td>
+    <td></td> <!-- Select -->
+    <td></td> <!-- Department -->
+    <td></td> <!-- Capacity -->
+
+    <td>
+      <select>
+        ${addParameterOptions()}
+      </select>
+    </td>
+
+    <td>
+      <input type="number" min="1" max="5" value="3" />
+    </td>
+
+    <td>
+      <button class="deleteRow">Delete</button>
+    </td>
   `;
 
   row.querySelector(".deleteRow").onclick = () => row.remove();
@@ -74,6 +96,7 @@ function clearDepartments() {
 async function saveDepartment() {
   const table = document.getElementById("Department");
   const name = document.getElementById("DepartmentTitle").value;
+  const capacity = document.getElementById("DepartmentCapacity").value;
 
   if (!name.trim()) {
     alert("Enter department name");
@@ -84,13 +107,13 @@ async function saveDepartment() {
   const seen = new Set();
 
   for (let i = 1; i < table.rows.length; i++) {
-    const parameterId = Number(
-      table.rows[i].cells[0].querySelector("select").value
-    );
+    const select = table.rows[i].cells[3]?.querySelector("select");
+    const input = table.rows[i].cells[4]?.querySelector("input");
 
-    const weight = Number(
-      table.rows[i].cells[1].querySelector("input").value
-    );
+    if (!select || !input) continue; // skip title rows
+
+    const parameterId = Number(select.value);
+    const weight = Number(input.value);
 
     if (seen.has(parameterId)) {
       alert("Duplicate parameter not allowed");
@@ -112,6 +135,7 @@ async function saveDepartment() {
 
   const payload = {
     name,
+    capacity,
     parameters: parametersData
   };
 
@@ -131,6 +155,7 @@ async function saveDepartment() {
   }
 }
 
+// Loads all departments
 async function loadSavedDepartment() {
   clearDepartments();
 
@@ -140,19 +165,92 @@ async function loadSavedDepartment() {
   const table = document.getElementById("Department");
 
   data.jobs.forEach(job => {
-    const titleRow = table.insertRow(-1);
-    titleRow.innerHTML = `<td colspan="3"><strong>${job.name}</strong></td>`;
 
+    // Department header row
+    const titleRow = table.insertRow(-1);
+
+    titleRow.innerHTML = `
+      <td>
+        <input type="checkbox" class="deptCheckbox" value="${job.id}">
+      </td>
+
+      <td>
+        <strong>${job.name}</strong>
+      </td>
+
+      <td colspan="3">
+        <strong>${job.capacity || 0}</strong>
+      </td>
+    `;
+
+    // Parameter rows
     job.parameters.forEach(p => {
+
       const row = table.insertRow(-1);
 
       row.innerHTML = `
-        <td><select>${addParameterOptions(p.parameter.id)}</select></td>
-        <td><input type="number" min="1" max="5" value="${p.weight}" /></td>
-        <td><button class="deleteRow">Delete</button></td>
+        <td></td> <!-- Select -->
+        <td></td> <!-- Deparmtent -->
+        <td></td> <!-- Capacity -->
+
+        <td>
+          <select>
+            ${addParameterOptions(p.parameter.id)}
+          </select>
+        </td>
+
+        <td>
+          <input
+            type="number"
+            min="1"
+            max="5"
+            value="${p.weight}"
+          />
+        </td>
+
+        <td>
+          <button class="deleteRow">Delete</button>
+        </td>
       `;
 
       row.querySelector(".deleteRow").onclick = () => row.remove();
     });
   });
+}
+
+async function deleteDepartments() {
+  const selected = Array.from(
+    document.querySelectorAll(".deptCheckbox:checked")
+  ).map(cb => Number(cb.value));
+
+  if (selected.length === 0) {
+    alert("Select at least one department to delete");
+    return;
+  }
+
+  const confirmed = confirm(
+    `Are you sure you want to delete ${selected.length} department(s)? This cannot be undone.`
+  );
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch("/api/jobs", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: selected })
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      console.log(result.error);
+      return;
+    }
+
+    alert("Department(s) successfully deleted");
+    loadSavedDepartment();
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete department(s)!");
+  }
 }
