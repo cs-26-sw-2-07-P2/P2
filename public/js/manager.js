@@ -2,6 +2,9 @@ import { renderNavbar } from "./components/navbar.js";
 import { renderQuestionnairePage } from "./questionnaire.js";
 import { renderDepartmentsPage } from "./departments.js";
 import { renderParametersPage } from "./parameters.js";
+
+import { renderDepartmentViewerPage } from "./department_viewer.js";
+
 import { logout } from "./components/logout.js";
 
 let app;
@@ -69,6 +72,10 @@ async function render(route) {
 
     case "questionnaires":
       renderQuestionnairePage(app);
+      break;
+
+    case "department_viewer":
+      renderDepartmentViewerPage(app);
       break;
 
     default: // if no route found

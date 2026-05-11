@@ -20,7 +20,8 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "pg": "^8.20.0",
-    "prisma": "^6.19.3"
+    "prisma": "^6.19.3",
+    "sortablejs": "^1.15.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
