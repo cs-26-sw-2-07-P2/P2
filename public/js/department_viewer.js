@@ -4,6 +4,10 @@
 export async function renderDepartmentViewerPage(container){
     container.innerHTML = `
     <h1>View Your Teams!</h1>
+    <h2>System score for compatibility; ${mockData.systemScore*100}%</h2>
+    <button id="loadTeams">Load Teams</button>
+    <button id="saveTeams">Save Teams</button>
+
     <div id="sortableList">
         <div id="departmentTable" style="min-height: 50px; display: flex; flex-wrap: wrap; gap: 16px;">
           ${createDepartmentTables(departments)}
@@ -14,9 +18,19 @@ export async function renderDepartmentViewerPage(container){
     makeSortable(departments);
     countAndDisplayEmployees();
 
-
+    document.getElementById("loadTeams").onclick = loadTeams;
+    document.getElementById("saveTeams").onclick = saveTeams;
 
 }
+
+function loadTeams(){
+  return;
+}
+
+function saveTeams(){
+  return;
+}
+
 
 const mockData = {
   systemScore: 0.7875,
@@ -78,16 +92,7 @@ const mockData = {
           { compatibility: 0.77, employee: { username: "Luna" } },
           { compatibility: 0.76, employee: { username: "Mark" } },
           { compatibility: 0.77, employee: { username: "Nina" } },
-      ], averageCompatibility: 0.7700, fillRate: 1 },
-      '10': { id: 10, name: 'Cleaning', capacity: 20, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '11': { id: 11, name: 'Ride Operator', capacity: 20, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '12': { id: 12, name: 'Restaurant', capacity: 10, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '13': { id: 13, name: 'Security', capacity: 10, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '14': { id: 14, name: 'Maintenance', capacity: 5, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '15': { id: 15, name: 'Sales', capacity: 10, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '16': { id: 16, name: 'Ticket Scanner', capacity: 10, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '17': { id: 17, name: 'Customer Service', capacity: 20, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
-      '18': { id: 18, name: 'Performer', capacity: 5, amount: 0, employees: [], averageCompatibility: 0, fillRate: 0 },
+      ], averageCompatibility: 0.7700, fillRate: 1 }
     }
   }
 
@@ -97,7 +102,7 @@ function createEmployeeDivs(employees){
   let html = "";
   if (employees.length === 0){
     html +=
-    `<div class="employee placeholder">Empty</div>`
+    `<div class="placeholder">Empty</div>`
   }
 
   employees.forEach(employee => {
@@ -109,13 +114,34 @@ function createEmployeeDivs(employees){
   return html;
 }
 
+function checkPlaceholders(){
+  Object.values(departments).forEach(department => {
+    let currentDepartmentDiv = document.getElementById(`${department.id}`)
+    
+    let placeholders = currentDepartmentDiv.querySelector(".placeholder");
+    let realEmployees = currentDepartmentDiv.querySelector(".employee");
+    
+    // If there is no placerholder div and no employee divs;
+    if (!placeholders && !realEmployees){
+      let placeholder = document.createElement("div");
+      placeholder.classList.add("placeholder");
+      placeholder.textContent = "Empty";
+      currentDepartmentDiv.appendChild(placeholder);
+    }
+    else if (placeholders && realEmployees){
+      placeholders.remove();
+    }
+    
+  });
+}
+
 function countAndDisplayEmployees(){
   
   Object.values(departments).forEach(department => {
-    let currentDepartmentDiv = document.getElementById(`${department.name}`);
+    let currentDepartmentDiv = document.getElementById(`${department.id}`);
     let employeeCount = currentDepartmentDiv.querySelectorAll(".employee").length; 
 
-    let counter = document.getElementById(`${department.name}-count`);
+    let counter = document.getElementById(`${department.id}-count`);
     counter.innerHTML = `${employeeCount} / ${department.capacity}`;
 
   })
@@ -124,11 +150,15 @@ function countAndDisplayEmployees(){
 
 function makeSortable(departments){
   Object.values(departments).forEach(department => {
-    new Sortable(document.getElementById(department.name), {
+    new Sortable(document.getElementById(department.id), {
       animation: 150,
       group: "employees",
-      draggable: ".employee",
-      onEnd: countAndDisplayEmployees,
+      draggable: ".employee, .placeholder",
+      filter: ".placeholder",
+      onEnd: function(){
+        countAndDisplayEmployees();
+        checkPlaceholders();
+      }, 
       emptyInsertThreshold: 20,
     })
   })
@@ -138,9 +168,11 @@ function createDepartmentTables(departments){
   let html = "";
   Object.values(departments).forEach(department => {
     html += 
-    `<div id="${department.name}">
-      <strong> ${department.name} </strong>
-      <span id="${department.name}-count"> ${department.amount}/${department.capacity} </span>
+    `<div id="${department.id}" class="departmentcard">
+      <div class="departmentheader">
+        <div class="departmentname"> ${department.name} </div>
+        <span id="${department.id}-count" class="departmentcount"> ${department.amount}/${department.capacity} </span>
+      </div>
       ${createEmployeeDivs(department.employees)} 
     </div> \n`;
   })
