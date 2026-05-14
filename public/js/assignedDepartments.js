@@ -1,6 +1,3 @@
-
-
-
 export async function renderDepartmentViewerPage(container){
     container.innerHTML = `
     <h1>View Your Teams!</h1>
@@ -23,8 +20,22 @@ export async function renderDepartmentViewerPage(container){
 
 }
 
-function loadTeams(){
-  return;
+async function loadTeams(){
+  try {
+    const response = await fetch("/api/assignments");
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.log(result.error);
+      return;
+    }
+
+    console.log(result); // See results
+    
+  } catch (error) {
+    console.error(error);
+    return;
+  }
 }
 
 function saveTeams(){
