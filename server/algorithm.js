@@ -25,9 +25,12 @@ async function PBC_Algorithm() {
 
     const compatibilityResults = calculateCompatibility(responses, jobs); // returns a list of priority lists of all employees that have answered a questionnaire.
 
-    const assignments = distributeEmployees(compatibilityResults, jobs);
+    const { jobMap, assignmentRows, systemScore } = distributeEmployees(compatibilityResults, jobs);
 
-    console.log(assignments); // log job/department assignment and total compatiblity score aka systemScore.
+    await postAlgorithmData(assignmentRows);
+
+    console.log(jobMap); // log job/department assignment
+    console.log(systemScore); // systemScore
 }
 
 async function getAlgorithmData() {
@@ -279,9 +282,45 @@ function distributeEmployees(results, jobs) {
         totalEmployees += job.amount;
     }
 
+    // Flatten assignments for database
+    const assignmentRows = [];
+
+    for (const jobId in jobMap) {
+
+        const job = jobMap[jobId];
+
+        for (const e of job.employees) {
+
+            assignmentRows.push({
+                employeeId: e.employee.employeeId,
+                jobId: job.id,
+                compatibility: e.compatibility,
+                priorityRank: e.priorityIndex + 1
+            });
+        }
+    }
+
     const systemScore = totalEmployees > 0 ? totalCompatibility / totalEmployees : 0; // global satisfaction average for all employees
 
-    return { jobMap, systemScore };
+    return { jobMap, assignmentRows, systemScore };
+}
+
+async function postAlgorithmData(compatibilityAssignments) {
+    const assignments = compatibilityAssignments;
+    try {
+        // using $transaction i ensure both prisma operations have to work
+        await prisma.$transaction([
+            prisma.assignment.deleteMany(),
+
+            prisma.assignment.createMany({
+                data: assignments
+            })
+        ]);
+
+    } catch (error) {
+        console.log("Error: ", error);
+        console.log("Assigments:\n", assignments);
+    }
 }
 
 // Function to display data fetched from DB to get an overview

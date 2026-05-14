@@ -36,7 +36,7 @@ async function createEmployees(amount) {
 }
 
 async function main() {
-  const amountofEmployees = 20;
+  const amountofEmployees = 100;
 
   await createEmployees(amountofEmployees);
 
@@ -60,15 +60,15 @@ async function main() {
   // JOBS
   await prisma.job.createMany({
     data: [
-      { name: "Cleaning", capacity: 20, amount: 0 },
-      { name: "Ride Operator", capacity: 20, amount: 0 },
-      { name: "Restaurant", capacity: 10, amount: 0 },
-      { name: "Security", capacity: 10, amount: 0 },
-      { name: "Maintenance", capacity: 5, amount: 0 },
-      { name: "Sales", capacity: 10, amount: 0 },
-      { name: "Ticket Scanner", capacity: 10, amount: 0 },
-      { name: "Customer Service", capacity: 20, amount: 0 },
-      { name: "Perfomer", capacity: 5, amount: 0 },
+      { name: "Cleaning", capacity: 20 },
+      { name: "Ride Operator", capacity: 20 },
+      { name: "Restaurant", capacity: 10 },
+      { name: "Security", capacity: 10 },
+      { name: "Maintenance", capacity: 5 },
+      { name: "Sales", capacity: 10 },
+      { name: "Ticket Scanner", capacity: 10 },
+      { name: "Customer Service", capacity: 20 },
+      { name: "Perfomer", capacity: 5 },
     ],
     skipDuplicates: true
   });
