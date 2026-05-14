@@ -546,6 +546,28 @@ app.get("/api/response", async (req, res) => {
   }
 });
 
+app.get("/api/assignments", async (req, res) => {
+    if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    const assignments = await prisma.assignment.findMany();
+    res.json({ assignments });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch" });
+  }
+});
+
 // requireLogin for session based routing
 function requireLogin(req, res, next) {
   if (!req.session.user) {
