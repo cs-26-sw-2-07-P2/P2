@@ -4,6 +4,7 @@ export async function renderDepartmentViewerPage(container){
     <h2>System score for compatibility; ${mockData.systemScore*100}%</h2>
     <button id="loadTeams">Load Teams</button>
     <button id="saveTeams">Save Teams</button>
+    <button id="runAlgorithm">Run Algorithm</button>
 
     <div id="sortableList">
         <div id="departmentTable" style="min-height: 50px; display: flex; flex-wrap: wrap; gap: 16px;">
@@ -17,6 +18,7 @@ export async function renderDepartmentViewerPage(container){
 
     document.getElementById("loadTeams").onclick = loadTeams;
     document.getElementById("saveTeams").onclick = saveTeams;
+    document.getElementById("runAlgorithm").onclick = runAlgorithm;
 
 }
 
@@ -42,6 +44,20 @@ function saveTeams(){
   return;
 }
 
+async function runAlgorithm() {
+  try {
+    const response = await fetch("/api/run-algorithm", {
+      method: "POST"
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+    
+  } catch (error) {
+    console.error(error); 
+  }
+}
 
 const mockData = {
   systemScore: 0.7875,

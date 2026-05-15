@@ -362,7 +362,7 @@ function displayData(responses, jobs) {
     });
 }
 
-PBC_Algorithm();
+module.exports = PBC_Algorithm; // Export function for usage
 
 /*
 ===== Algorithm Description =====

@@ -6,6 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
+const PBC_Algorithm = require("./algorithm");
 
 // Variables
 const dev_mode = false; // only for development
@@ -619,6 +620,38 @@ app.get("/api/employee", async (req, res) => {
   }
 });
 
+app.post("/api/run-algorithm", async (req, res) => {
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    await PBC_Algorithm();
+
+    res.json({
+      success: true,
+      message: "Algorithm completed"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Algorithm failed"
+    });
+  }
+});
 
 // Routing
 const routes = [
