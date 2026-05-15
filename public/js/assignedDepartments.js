@@ -1,28 +1,84 @@
+let departments = {};
+let employeeIndex = {}; 
+
+function renderDepartments() {
+  const container = document.getElementById("departmentTable");
+
+  container.innerHTML = createDepartmentTables(departments);
+
+  makeSortable(departments);
+  countAndDisplayEmployees();
+  checkPlaceholders();
+  updateSystemScore();
+}
+
 export async function renderDepartmentViewerPage(container){
-    container.innerHTML = `
+
+  container.innerHTML = `
     <h1>View Your Teams!</h1>
-    <h2>System score for compatibility; ${mockData.systemScore*100}%</h2>
+    <h2 id="systemScore">System score: --</h2>
+
     <button id="loadTeams">Load Teams</button>
     <button id="saveTeams">Save Teams</button>
     <button id="runAlgorithm">Run Algorithm</button>
 
     <div id="sortableList">
-        <div id="departmentTable" style="min-height: 50px; display: flex; flex-wrap: wrap; gap: 16px;">
-          ${createDepartmentTables(departments)}
-        </div>
+      <div id="departmentTable"></div>
     </div>
-    `
+  `;
 
-    makeSortable(departments);
-    countAndDisplayEmployees();
-
-    document.getElementById("loadTeams").onclick = loadTeams;
-    document.getElementById("saveTeams").onclick = saveTeams;
-    document.getElementById("runAlgorithm").onclick = runAlgorithm;
-
+  document.getElementById("loadTeams").onclick = loadTeams;
+  document.getElementById("saveTeams").onclick = saveTeams;
+  document.getElementById("runAlgorithm").onclick = runAlgorithm;
 }
 
-async function loadTeams(){
+// Helper function to convert Assigments to jobMap for visual display
+function transformAssignments(assignments) {
+
+  const jobMap = {};
+  employeeIndex = {};
+
+  for (const a of assignments) {
+
+    if (!jobMap[a.jobId]) {
+      jobMap[a.jobId] = {
+        id: a.jobId,
+        name: a.job?.name || `Job ${a.jobId}`,
+        capacity: a.job?.capacity || 0,
+        employees: [],
+        amount: 0,
+        averageCompatibility: 0
+      };
+    }
+
+    const employeeObj = {
+      employeeId: a.employeeId,
+      compatibility: a.compatibility,
+      employee: {
+        username: a.employee?.user?.username || "Unknown"
+      }
+    };
+
+    jobMap[a.jobId].employees.push(employeeObj);
+
+    // store global mapping for saving
+    employeeIndex[a.employeeId] = {
+      jobId: a.jobId,
+      compatibility: a.compatibility,
+      priorityRank: a.priorityRank,
+      username: a.employee?.user?.username
+    };
+  }
+
+  for (const job of Object.values(jobMap)) {
+    job.amount = job.employees.length;
+  }
+
+  return jobMap;
+}
+
+// Load teams currently assigned in DB
+async function loadTeams() {
   try {
     const response = await fetch("/api/assignments");
     const result = await response.json();
@@ -32,18 +88,62 @@ async function loadTeams(){
       return;
     }
 
-    console.log(result); // See results
-    
+    departments = transformAssignments(result.assignments);
+
+    employeeIndex = {}; // Reset employee index before loading
+
+    renderDepartments();
+
   } catch (error) {
     console.error(error);
-    return;
   }
 }
 
-function saveTeams(){
-  return;
+// Save teams -> allows manager to reassign assignments reads from frontend.
+async function saveTeams() {
+  try {
+    const assignments = [];
+    const seen = new Set();
+
+    Object.values(departments).forEach(job => {
+      const jobDiv = document.getElementById(job.id);
+      const employeeDivs = jobDiv.querySelectorAll(".employee[data-employee-id]");
+
+      employeeDivs.forEach(div => {
+        const id = Number(div.dataset.employeeId);
+
+        if (seen.has(id)) return;
+        seen.add(id);
+
+        assignments.push({
+          employeeId: id,
+          jobId: job.id,
+          compatibility: employeeIndex[id]?.compatibility ?? 0,
+          priorityRank: employeeIndex[id]?.priorityRank ?? 0
+        });
+      });
+    });
+
+    const response = await fetch("/api/assignments/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assignments })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.log(result.error);
+      return;
+    }
+
+    console.log("Saved!");
+  } catch (err) {
+    console.error(err);
+  }
 }
 
+// Use algorithm API to calculate compatibility (Will overwrite assignments)
 async function runAlgorithm() {
   try {
     const response = await fetch("/api/run-algorithm", {
@@ -52,79 +152,17 @@ async function runAlgorithm() {
 
     const result = await response.json();
 
-    console.log(result);
-    
+    // refresh UI after backend changes DB
+    await loadTeams();
+
   } catch (error) {
-    console.error(error); 
+    console.error(error);
   }
 }
 
-const mockData = {
-  systemScore: 0.7875,
-  jobMap: {
-      '1': { id: 1, name: 'Cleaning', capacity: 20, amount: 4, employees: [
-          { compatibility: 0.85, employee: { username: "Alice" } },
-          { compatibility: 0.78, employee: { username: "Bob" } },
-          { compatibility: 0.82, employee: { username: "Charlie" } },
-          { compatibility: 0.76, employee: { username: "Diana" } },
-      ], averageCompatibility: 0.80625, fillRate: 0.2 },
-      '2': { id: 2, name: 'Ride Operator', capacity: 20, amount: 6, employees: [
-          { compatibility: 0.91, employee: { username: "Eve" } },
-          { compatibility: 0.74, employee: { username: "Frank" } },
-          { compatibility: 0.80, employee: { username: "Grace" } },
-          { compatibility: 0.77, employee: { username: "Hank" } },
-          { compatibility: 0.79, employee: { username: "Ivy" } },
-          { compatibility: 0.72, employee: { username: "Jack" } },
-      ], averageCompatibility: 0.7833, fillRate: 0.3 },
-      '3': { id: 3, name: 'Restaurant', capacity: 10, amount: 2, employees: [
-          { compatibility: 0.88, employee: { username: "Karen" } },
-          { compatibility: 0.82, employee: { username: "Leo" } },
-      ], averageCompatibility: 0.85, fillRate: 0.2 },
-      '4': { id: 4, name: 'Security', capacity: 10, amount: 5, employees: [
-          { compatibility: 0.79, employee: { username: "Mia" } },
-          { compatibility: 0.75, employee: { username: "Ned" } },
-          { compatibility: 0.77, employee: { username: "Olivia" } },
-          { compatibility: 0.74, employee: { username: "Paul" } },
-          { compatibility: 0.76, employee: { username: "Quinn" } },
-      ], averageCompatibility: 0.765, fillRate: 0.5 },
-      '5': { id: 5, name: 'Maintenance', capacity: 5, amount: 5, employees: [
-          { compatibility: 0.78, employee: { username: "Rose" } },
-          { compatibility: 0.75, employee: { username: "Sam" } },
-          { compatibility: 0.76, employee: { username: "Tina" } },
-          { compatibility: 0.74, employee: { username: "Uma" } },
-          { compatibility: 0.77, employee: { username: "Victor" } },
-      ], averageCompatibility: 0.76, fillRate: 1 },
-      '6': { id: 6, name: 'Sales', capacity: 10, amount: 5, employees: [
-          { compatibility: 0.80, employee: { username: "Wendy" } },
-          { compatibility: 0.77, employee: { username: "Xander" } },
-          { compatibility: 0.76, employee: { username: "Yara" } },
-          { compatibility: 0.75, employee: { username: "Zoe" } },
-          { compatibility: 0.78, employee: { username: "Aaron" } },
-      ], averageCompatibility: 0.7750, fillRate: 0.5 },
-      '7': { id: 7, name: 'Ticket Scanner', capacity: 10, amount: 7, employees: [
-          { compatibility: 0.84, employee: { username: "Beth" } },
-          { compatibility: 0.79, employee: { username: "Carl" } },
-          { compatibility: 0.81, employee: { username: "Deb" } },
-          { compatibility: 0.80, employee: { username: "Erik" } },
-          { compatibility: 0.82, employee: { username: "Faye" } },
-          { compatibility: 0.78, employee: { username: "Glen" } },
-          { compatibility: 0.83, employee: { username: "Hope" } },
-      ], averageCompatibility: 0.8071, fillRate: 0.7 },
-      '8': { id: 8, name: 'Customer Service', capacity: 20, amount: 1, employees: [
-          { compatibility: 0.875, employee: { username: "Ian" } },
-      ], averageCompatibility: 0.875, fillRate: 0.05 },
-      '9': { id: 9, name: 'Performer', capacity: 5, amount: 5, employees: [
-          { compatibility: 0.78, employee: { username: "Jade" } },
-          { compatibility: 0.75, employee: { username: "Kyle" } },
-          { compatibility: 0.77, employee: { username: "Luna" } },
-          { compatibility: 0.76, employee: { username: "Mark" } },
-          { compatibility: 0.77, employee: { username: "Nina" } },
-      ], averageCompatibility: 0.7700, fillRate: 1 }
-    }
-  }
-
-const departments = mockData.jobMap;
-
+// ===========================
+// Visual functions and sortable implementation
+// ===========================
 function createEmployeeDivs(employees){
   let html = "";
   if (employees.length === 0){
@@ -134,8 +172,8 @@ function createEmployeeDivs(employees){
 
   employees.forEach(employee => {
     html += 
-    `<div class="employee">
-    ${employee.employee.username} // Compatibility: ${employee.compatibility*100}%
+    `<div class="employee" data-employee-id="${employee.employeeId}">
+      ${employee.employee.username} // Compatibility: ${employee.compatibility*100}%
     </div>`
   })
   return html;
@@ -175,20 +213,29 @@ function countAndDisplayEmployees(){
 
 }
 
-function makeSortable(departments){
+function makeSortable(departments) {
+
   Object.values(departments).forEach(department => {
-    new Sortable(document.getElementById(department.id), {
+
+    const el = document.getElementById(department.id);
+
+    if (el._sortable) el._sortable.destroy();
+
+    el._sortable = new Sortable(el, {
       animation: 150,
       group: "employees",
       draggable: ".employee, .placeholder",
       filter: ".placeholder",
-      onEnd: function(){
+
+      onEnd: function (evt) {
+        syncDepartmentsFromDOM(); // sync from frontend
         countAndDisplayEmployees();
         checkPlaceholders();
-      }, 
-      emptyInsertThreshold: 20,
-    })
-  })
+        updateSystemScore(); // live update systemScore
+      }
+    });
+
+  });
 }
 
 function createDepartmentTables(departments){
@@ -206,5 +253,41 @@ function createDepartmentTables(departments){
   return html;
 }
 
+// Will recalculate the systemScore and display it live
+function updateSystemScore() {
+  let total = 0;
+  let count = 0;
 
+  Object.values(departments).forEach(job => {
+    const jobDiv = document.getElementById(job.id);
+    const employeeDivs = jobDiv.querySelectorAll(".employee");
 
+    employeeDivs.forEach(div => {
+      const id = Number(div.dataset.employeeId);
+      total += employeeIndex[id]?.compatibility ?? 0;
+      count++;
+    });
+  });
+
+  const score = count ? total / count : 0;
+
+  document.getElementById("systemScore").innerText =
+    `System score: ${(score * 100).toFixed(2)}%`;
+}
+
+// This will update visual compatibilities and employee names from DOM
+function syncDepartmentsFromDOM() {
+  Object.values(departments).forEach(job => {
+    const jobDiv = document.getElementById(job.id);
+
+    const employeeDivs = jobDiv.querySelectorAll(".employee");
+
+    job.employees = Array.from(employeeDivs).map(div => ({
+      employeeId: Number(div.dataset.employeeId),
+      compatibility: employeeIndex[Number(div.dataset.employeeId)]?.compatibility ?? 0,
+      employee: {
+        username: employeeIndex[Number(div.dataset.employeeId)]?.username ?? "Unknown"
+      }
+    }));
+  });
+}

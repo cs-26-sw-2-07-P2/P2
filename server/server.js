@@ -560,12 +560,60 @@ app.get("/api/assignments", async (req, res) => {
       return res.status(403).json({ error: "Not a manager" });
     }
 
-    const assignments = await prisma.assignment.findMany();
+    const assignments = await prisma.assignment.findMany({
+      include: {
+        job: true,
+        employee: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
     res.json({ assignments });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch" });
+  }
+});
+
+app.post("/api/assignments/save", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    const { assignments } = req.body;
+
+    // Use $transaction to ensure both prisma methods are completed
+    // Use tx to make a copy of the request only send to actual DB if it dosen't crash
+    await prisma.$transaction(async (tx) => {
+      await tx.assignment.deleteMany();
+
+      const cleaned = Array.from(
+        new Map(assignments.map(a => [a.employeeId, a])).values()
+      );
+
+      await tx.assignment.createMany({
+        data: cleaned
+      });
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to save assignments" });
   }
 });
 
