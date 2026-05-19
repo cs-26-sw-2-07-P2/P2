@@ -66,7 +66,7 @@ async function getAlgorithmData() {
     return { responses, jobs };
 }
 
-// Converts values from 1–5 scale into 0–1 range for compatibility calculation
+// Converts values from 1–5 scale into 0.2–1 range for compatibility calculation
 // This ensures all parameters are comparable mathematically
 function normalize(value) {
     return value / 5;
@@ -88,7 +88,7 @@ function calculateCompatibility(responses, jobs) {
                 answer.question.parameter.name;
 
             employeeAnswers[parameterName] =
-                normalize(answer.value); // Convert 1–5 → 0–1 scale
+                normalize(answer.value); // Convert 1–5 → 0.2–1 scale
         }
 
         const priorities = [];
