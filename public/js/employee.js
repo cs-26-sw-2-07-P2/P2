@@ -87,6 +87,7 @@ function renderTeams() {
   app.innerHTML = `
     <div class="page-header">
       <h1>Your Team</h1>
+      <button id="renderTeam">Render Team</button>
       <p class="muted">View your assigned team(s)</p>
     </div>
 
@@ -95,7 +96,7 @@ function renderTeams() {
     </div>
   `;
 
-  renderTeam();
+  document.getElementById("renderTeam").onclick = renderTeam;
 }
 
 function renderQuestionnairesPage() {
@@ -160,39 +161,27 @@ function renderTasks() {
   }
 }
 
-function renderTeam() {
-  const teamContainer = document.getElementById("containerTeam");
-  for (let j = 0; j < (overdueTasks+ongoingTasks); j++) {
-    let div1 = document.createElement("div");
-    div1.className = "boxTeamDiv1";
-    div1.innerHTML = `<b>Team ${j}</b>`;
-    teamContainer.appendChild(div1);
-    for (let i = 1; i < 6; i++) {
-    let div2 = document.createElement("div");
-    div2.className = "boxTeamDiv2";
-    //text fields
-    let name = 'John Software den ' + i + '.';
-    let email = 'johnnyboy@gmail.com'
-    let phone = '+45 67676767'
-    //evt tilføj skillset på hver employee????
-    div2.innerHTML = `${name}<br>${email}<br>${phone}`;
-    teamContainer.appendChild(div2);
+async function renderTeam() {
+  try {
+    const response = await fetch("/api/employee-assignment");
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.log(result.error);
+      return;
     }
-    let div3 = document.createElement("div");
-    div3.innerHTML = `<hr>`;
-    teamContainer.appendChild(div3);
+
+    const department = transformAssignment(result.assignment);
+
+
+  } catch (error) {
+    console.error(error);
   }
 }
 
-/*function generateQuestionaire() {
-  let amountOfQuestionnaires = 2;
-    for (let i = 0; i < amountOfQuestionnaires; i++) {
-      //create the button
-      let insertedButton = document.createElement("button");
-      //insert the button
-      document.getElementById("empContainerQuestionnaires").appendChild(insertedButton);
-      insertedButton.className = "empQuestionnaire";
-      insertedButton.textContent = "Questionaire Name " + i;
-      insertedButton.style.display = "block";
-    }
-}*/
+function transformAssignment(assignment) {
+  const team = {};
+
+  console.log(assignment.job.name);
+  console.log(assignment.job.capacity); 
+}

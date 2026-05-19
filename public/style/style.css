@@ -364,3 +364,52 @@ hr {
   background: #04AA6D;
   cursor: pointer;
 }
+
+/* Department Viewer */
+.employee {
+    background: #f0f0f0;
+    border-radius: 2px;
+    padding: 8px;
+    cursor: grab;
+}
+
+.departmentcard {
+    background: #83b8a4;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.placeholder {
+    padding: 8px;
+    background: #f0f0f0;
+    text-align: center;
+    font-style: italic;
+}
+
+#departmentTable {
+  margin-top: 20px;
+}
+
+.departmentname {
+    background: #f5fdf5;
+    padding: 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+}
+
+.departmentheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    white-space: nowrap;
+    gap: 8px;
+}
+
+.departmentcount {
+    margin-bottom: 4px;
+    padding: 8px;
+    background: #b2dbcc;
+    border-radius: 4px;
+    flex-shrink: 0;
+
+}

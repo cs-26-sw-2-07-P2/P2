@@ -6,6 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
+const PBC_Algorithm = require("./algorithm");
 
 // Variables
 const dev_mode = false; // only for development
@@ -289,6 +290,35 @@ app.get("/api/jobs", async (req, res) => {
   }
 });
 
+app.get("/api/employee-assignment", async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!employee) {
+      return res.status(403).json({ error: "Not an employee" });
+    }
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { employeeId: employee.id },
+      include: {
+        job: true,
+      }
+    });
+
+    res.json({ assignment });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get department" });
+  }
+})
+
 // Delete selected departments
 app.delete("/api/jobs", async (req, res) => {
   const { ids } = req.body;
@@ -546,6 +576,76 @@ app.get("/api/response", async (req, res) => {
   }
 });
 
+app.get("/api/assignments", async (req, res) => {
+    if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    const assignments = await prisma.assignment.findMany({
+      include: {
+        job: true,
+        employee: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
+    res.json({ assignments });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch" });
+  }
+});
+
+app.post("/api/assignments/save", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    const { assignments } = req.body;
+
+    // Use $transaction to ensure both prisma methods are completed
+    // Use tx to make a copy of the request only send to actual DB if it dosen't crash
+    await prisma.$transaction(async (tx) => {
+      await tx.assignment.deleteMany();
+
+      const cleaned = Array.from(
+        new Map(assignments.map(a => [a.employeeId, a])).values()
+      );
+
+      await tx.assignment.createMany({
+        data: cleaned
+      });
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to save assignments" });
+  }
+});
+
 // requireLogin for session based routing
 function requireLogin(req, res, next) {
   if (!req.session.user) {
@@ -594,6 +694,39 @@ app.get("/api/employee", async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch" });
+  }
+});
+
+app.post("/api/run-algorithm", async (req, res) => {
+
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    await PBC_Algorithm();
+
+    res.json({
+      success: true,
+      message: "Algorithm completed"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Algorithm failed"
+    });
   }
 });
 
