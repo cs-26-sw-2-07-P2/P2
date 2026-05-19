@@ -13,6 +13,7 @@ const NAVBAR_CONFIG = {
       { text: "Parameters", route: "parameters" },
       { text: "Departments", route: "departments" },
       { text: "Questionnaires", route: "questionnaires" },
+      { text: "View Teams", route: "department_viewer"},
     ],
   },
 };
