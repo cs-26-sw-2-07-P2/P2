@@ -362,7 +362,15 @@ function displayData(responses, jobs) {
     });
 }
 
-module.exports = PBC_Algorithm; // Export function for usage
+
+// Export functions for unit testing
+module.exports = {
+  default: PBC_Algorithm,
+  normalize,
+  calculateCompatibility,
+  distributeEmployees
+};
+
 
 /*
 ===== Algorithm Description =====

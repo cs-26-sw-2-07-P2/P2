@@ -6,7 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
-const PBC_Algorithm = require("./algorithm");
+const { default: PBC_Algorithm } = require("./algorithm");
 
 // Variables
 const dev_mode = false; // only for development
