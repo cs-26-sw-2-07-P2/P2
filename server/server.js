@@ -290,6 +290,35 @@ app.get("/api/jobs", async (req, res) => {
   }
 });
 
+app.get("/api/employee-assignment", async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!employee) {
+      return res.status(403).json({ error: "Not an employee" });
+    }
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { employeeId: employee.id },
+      include: {
+        job: true,
+      }
+    });
+
+    res.json({ assignment });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get department" });
+  }
+})
+
 // Delete selected departments
 app.delete("/api/jobs", async (req, res) => {
   const { ids } = req.body;

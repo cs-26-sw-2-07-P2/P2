@@ -21,6 +21,7 @@ export async function renderDepartmentViewerPage(container){
     <button id="loadTeams">Load Teams</button>
     <button id="saveTeams">Save Teams</button>
     <button id="runAlgorithm">Run Algorithm</button>
+    <button id="updateSystemScore">Update systemScore</button>
 
     <div id="sortableList">
       <div id="departmentTable"></div>
@@ -30,6 +31,7 @@ export async function renderDepartmentViewerPage(container){
   document.getElementById("loadTeams").onclick = loadTeams;
   document.getElementById("saveTeams").onclick = saveTeams;
   document.getElementById("runAlgorithm").onclick = runAlgorithm;
+  document.getElementById("updateSystemScore").onclick = updateSystemScore;
 }
 
 // Helper function to convert Assigments to jobMap for visual display
@@ -89,8 +91,6 @@ async function loadTeams() {
     }
 
     departments = transformAssignments(result.assignments);
-
-    employeeIndex = {}; // Reset employee index before loading
 
     renderDepartments();
 
@@ -173,7 +173,7 @@ function createEmployeeDivs(employees){
   employees.forEach(employee => {
     html += 
     `<div class="employee" data-employee-id="${employee.employeeId}">
-      ${employee.employee.username} // Compatibility: ${employee.compatibility*100}%
+      ${employee.employee.username} ┃ Compatibility: ${employee.compatibility*100}%
     </div>`
   })
   return html;
