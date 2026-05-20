@@ -77,8 +77,8 @@ export async function renderQuestionnaires(container) {
         <td>${item.text}</td>
         <td>
           <div class="slidecontainer">
-            <input type="range" min="1" max="5" value="1" class="slider">
-            <span class="slider-value">1</span>
+            <input type="range" min="0" max="4" value="0" class="slider">
+            <span class="slider-value">0</span>
           </div>
         </td>
       `;

@@ -6,7 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
-const PBC_Algorithm = require("./algorithm");
+const { default: PBC_Algorithm } = require("./algorithm");
 
 // Variables
 const dev_mode = false; // only for development
@@ -307,11 +307,35 @@ app.get("/api/employee-assignment", async (req, res) => {
     const assignment = await prisma.assignment.findUnique({
       where: { employeeId: employee.id },
       include: {
-        job: true,
+        job: {
+          include: {
+            assignments: {
+              include: {
+                employee: {
+                  include: {
+                   user: {
+                    select: {
+                      username: true
+                    }
+                   }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     });
 
-    res.json({ assignment });
+    const team = assignment.job.assignments.map(a => ({
+      employeeId: a.employeeId,
+      name: a.employee.user.username,
+      compatibility: a.compatibility,
+      priorityRank: a.priorityRank,
+      manuallyAdjusted: a.manuallyAdjusted
+    }));
+
+    res.json({ assignment, team });
 
   } catch (error) {
     console.error(error);

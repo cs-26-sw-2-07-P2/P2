@@ -171,17 +171,38 @@ async function renderTeam() {
       return;
     }
 
-    const department = transformAssignment(result.assignment);
+    const { assignment, team } = result;
+    const myEmployeeId = assignment.employeeId;
 
+    const rows = team.map(a => `
+      <tr class="${a.employeeId === myEmployeeId ? "highlight" : ""}">
+        <td>
+            ${a.name}
+            ${a.employeeId === myEmployeeId ? " (You)" : ""}
+        </td>
+        <td>${a.compatibility}</td>
+        <td>${a.priorityRank}</td>
+        <td>${a.manuallyAdjusted ? "Yes" : "No"}</td>
+      </tr>
+    `).join("");
+
+    document.querySelector("#containerTeam").innerHTML = `
+      <table border="1" cellpadding="8">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Compatibility</th>
+            <th>Priority</th>
+            <th>Adjusted</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
 
   } catch (error) {
     console.error(error);
   }
-}
-
-function transformAssignment(assignment) {
-  const team = {};
-
-  console.log(assignment.job.name);
-  console.log(assignment.job.capacity); 
 }
