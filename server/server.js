@@ -651,9 +651,11 @@ app.post("/api/assignments/save", async (req, res) => {
     await prisma.$transaction(async (tx) => {
       await tx.assignment.deleteMany();
 
-      const cleaned = Array.from(
-        new Map(assignments.map(a => [a.employeeId, a])).values()
-      );
+    const cleaned = Array.from(
+      new Map(assignments.map(a => [a.employeeId, a])).values()).map(a => ({
+      ...a,
+      manuallyAdjusted: true,
+    }));
 
       await tx.assignment.createMany({
         data: cleaned

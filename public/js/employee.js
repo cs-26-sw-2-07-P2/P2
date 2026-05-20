@@ -180,7 +180,7 @@ async function renderTeam() {
             ${a.name}
             ${a.employeeId === myEmployeeId ? " (You)" : ""}
         </td>
-        <td>${a.compatibility}</td>
+        <td>${a.compatibility*100}%</td>
         <td>${a.priorityRank}</td>
         <td>${a.manuallyAdjusted ? "Yes" : "No"}</td>
       </tr>
