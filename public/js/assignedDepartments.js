@@ -102,31 +102,61 @@ async function loadTeams() {
 // Save teams -> allows manager to reassign assignments reads from frontend.
 async function saveTeams() {
   try {
+
     const assignments = [];
     const seen = new Set();
+    const priorityQueue = await getPriorityQueue();
+
+    // Create fast lookup map
+    const compatibilityMap = {};
+
+    priorityQueue.results.forEach(employee => {
+
+      compatibilityMap[employee.employeeId] = {};
+
+      employee.priorities.forEach(priority => {
+
+        compatibilityMap[employee.employeeId][priority.jobId] = {
+          compatibility: priority.compatibility,
+          priorityRank: priority.priorityRank
+        };
+
+      });
+    });
 
     Object.values(departments).forEach(job => {
+
       const jobDiv = document.getElementById(job.id);
-      const employeeDivs = jobDiv.querySelectorAll(".employee[data-employee-id]");
+
+      const employeeDivs =
+        jobDiv.querySelectorAll(".employee[data-employee-id]");
 
       employeeDivs.forEach(div => {
+
         const id = Number(div.dataset.employeeId);
 
         if (seen.has(id)) return;
+
         seen.add(id);
+
+        // get compatibility for THIS employee in THIS job
+        const match = compatibilityMap[id]?.[job.id];
 
         assignments.push({
           employeeId: id,
           jobId: job.id,
-          compatibility: employeeIndex[id]?.compatibility ?? 0,
-          priorityRank: employeeIndex[id]?.priorityRank ?? 0
+          compatibility: match?.compatibility ?? 0,
+          priorityRank: match?.priorityRank ?? 0
         });
+
       });
     });
 
     const response = await fetch("/api/assignments/save", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ assignments })
     });
 
@@ -137,9 +167,11 @@ async function saveTeams() {
       return;
     }
 
-    console.log("Saved!");
+    alert("Saved teams!");
+
   } catch (err) {
     console.error(err);
+    alert("Could not save teams!");
   }
 }
 
@@ -154,6 +186,24 @@ async function runAlgorithm() {
 
     // refresh UI after backend changes DB
     await loadTeams();
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Fetch the priority queue from Algorithm to frontend
+async function getPriorityQueue() {
+  try {
+    const response = await fetch("/api/compatibilityResults");
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.log(result.error);
+      return;
+    }
+
+    return result;
 
   } catch (error) {
     console.error(error);
