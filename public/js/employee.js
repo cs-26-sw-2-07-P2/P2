@@ -96,6 +96,8 @@ function renderTeams() {
     </div>
   `;
 
+  renderTeam();
+
   document.getElementById("renderTeam").onclick = renderTeam;
 }
 
