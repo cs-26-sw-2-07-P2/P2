@@ -1,5 +1,6 @@
 let departments = {};
 let employeeIndex = {}; 
+let priorityIndex = {};
 
 function renderDepartments() {
   const container = document.getElementById("departmentTable");
@@ -91,6 +92,8 @@ async function loadTeams() {
     }
 
     departments = transformAssignments(result.assignments);
+
+    await refreshPriorityIndex();
 
     renderDepartments();
 
@@ -210,6 +213,26 @@ async function getPriorityQueue() {
   }
 }
 
+// Helper function
+async function refreshPriorityIndex() {
+  const priorityQueue = await getPriorityQueue();
+
+  priorityIndex = {};
+
+  priorityQueue.results.forEach(employee => {
+    const empId = employee.employeeId;
+
+    priorityIndex[empId] = {};
+
+    employee.priorities.forEach(p => {
+      priorityIndex[empId][p.jobId] = {
+        compatibility: p.compatibility,
+        priorityRank: p.priorityRank
+      };
+    });
+  });
+}
+
 // ===========================
 // Visual functions and sortable implementation
 // ===========================
@@ -279,6 +302,7 @@ function makeSortable(departments) {
 
       onEnd: function (evt) {
         syncDepartmentsFromDOM(); // sync from frontend
+        renderDepartments(); // acutally render when moving
         countAndDisplayEmployees();
         checkPlaceholders();
         updateSystemScore(); // live update systemScore
@@ -314,7 +338,8 @@ function updateSystemScore() {
 
     employeeDivs.forEach(div => {
       const id = Number(div.dataset.employeeId);
-      total += employeeIndex[id]?.compatibility ?? 0;
+      const jobId = job.id;
+      total += priorityIndex[id]?.[jobId]?.compatibility ?? 0;
       count++;
     });
   });
@@ -332,12 +357,18 @@ function syncDepartmentsFromDOM() {
 
     const employeeDivs = jobDiv.querySelectorAll(".employee");
 
-    job.employees = Array.from(employeeDivs).map(div => ({
-      employeeId: Number(div.dataset.employeeId),
-      compatibility: employeeIndex[Number(div.dataset.employeeId)]?.compatibility ?? 0,
-      employee: {
-        username: employeeIndex[Number(div.dataset.employeeId)]?.username ?? "Unknown"
-      }
-    }));
+    job.employees = Array.from(employeeDivs).map(div => {
+      const id = Number(div.dataset.employeeId);
+
+      const priorityData = priorityIndex[id]?.[job.id];
+
+      return {
+        employeeId: id,
+        compatibility: priorityData?.compatibility ?? 0,
+        employee: {
+          username: employeeIndex[id]?.username ?? "Unknown"
+        }
+      };
+    });
   });
 }
