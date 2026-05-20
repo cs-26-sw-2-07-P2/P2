@@ -29,8 +29,6 @@ async function PBC_Algorithm() {
 
     await postAlgorithmData(assignmentRows);
 
-    console.log(jobMap); // log job/department assignment
-    console.log(systemScore); // systemScore
 }
 
 async function getAlgorithmData() {
@@ -323,52 +321,19 @@ async function postAlgorithmData(compatibilityAssignments) {
     }
 }
 
-// Function to display data fetched from DB to get an overview
-function displayData(responses, jobs) {
-    console.log("\n========== RESPONSES ==========\n");
+async function getCompatibilityResults() {
+    const { responses, jobs } = await getAlgorithmData();
 
-    responses.forEach((response) => {
-        console.log(`Response ID: ${response.id}`);
-
-        console.log(`Employee ID: ${response.employee.id}`);
-        console.log(`Username: ${response.employee.user.username}`);
-
-        console.log("Answers:");
-
-        response.answers.forEach((answer) => {
-            console.log(`  - Question ID: ${answer.questionId}`);
-            console.log(`    Value: ${answer.value}`);
-        });
-
-        console.log("-----------------------------------");
-    });
-
-    console.log("\n========== JOBS ==========\n");
-
-    jobs.forEach((job) => {
-        console.log(`Job ID: ${job.id}`);
-        console.log(`Name: ${job.name}`);
-        console.log(`Capacity: ${job.capacity}`);
-        console.log(`Current Amount: ${job.amount}`);
-
-        console.log("Parameters:");
-
-        job.parameters.forEach((param) => {
-            console.log(`  - Parameter: ${param.parameter.name}`);
-            console.log(`    Weight: ${param.weight}`);
-        });
-
-        console.log("-----------------------------------");
-    });
+    return calculateCompatibility(responses, jobs);
 }
-
 
 // Export functions for unit testing
 module.exports = {
   default: PBC_Algorithm,
   normalize,
   calculateCompatibility,
-  distributeEmployees
+  distributeEmployees,
+  getCompatibilityResults
 };
 
 

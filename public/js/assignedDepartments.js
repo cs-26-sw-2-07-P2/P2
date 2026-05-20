@@ -1,5 +1,6 @@
 let departments = {};
 let employeeIndex = {}; 
+let priorityIndex = {};
 
 function renderDepartments() {
   const container = document.getElementById("departmentTable");
@@ -92,6 +93,8 @@ async function loadTeams() {
 
     departments = transformAssignments(result.assignments);
 
+    await refreshPriorityIndex();
+
     renderDepartments();
 
   } catch (error) {
@@ -102,31 +105,61 @@ async function loadTeams() {
 // Save teams -> allows manager to reassign assignments reads from frontend.
 async function saveTeams() {
   try {
+
     const assignments = [];
     const seen = new Set();
+    const priorityQueue = await getPriorityQueue();
+
+    // Create fast lookup map
+    const compatibilityMap = {};
+
+    priorityQueue.results.forEach(employee => {
+
+      compatibilityMap[employee.employeeId] = {};
+
+      employee.priorities.forEach(priority => {
+
+        compatibilityMap[employee.employeeId][priority.jobId] = {
+          compatibility: priority.compatibility,
+          priorityRank: priority.priorityRank
+        };
+
+      });
+    });
 
     Object.values(departments).forEach(job => {
+
       const jobDiv = document.getElementById(job.id);
-      const employeeDivs = jobDiv.querySelectorAll(".employee[data-employee-id]");
+
+      const employeeDivs =
+        jobDiv.querySelectorAll(".employee[data-employee-id]");
 
       employeeDivs.forEach(div => {
+
         const id = Number(div.dataset.employeeId);
 
         if (seen.has(id)) return;
+
         seen.add(id);
+
+        // get compatibility for THIS employee in THIS job
+        const match = compatibilityMap[id]?.[job.id];
 
         assignments.push({
           employeeId: id,
           jobId: job.id,
-          compatibility: employeeIndex[id]?.compatibility ?? 0,
-          priorityRank: employeeIndex[id]?.priorityRank ?? 0
+          compatibility: match?.compatibility ?? 0,
+          priorityRank: match?.priorityRank ?? 0
         });
+
       });
     });
 
     const response = await fetch("/api/assignments/save", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ assignments })
     });
 
@@ -137,9 +170,11 @@ async function saveTeams() {
       return;
     }
 
-    console.log("Saved!");
+    alert("Saved teams!");
+
   } catch (err) {
     console.error(err);
+    alert("Could not save teams!");
   }
 }
 
@@ -158,6 +193,44 @@ async function runAlgorithm() {
   } catch (error) {
     console.error(error);
   }
+}
+
+// Fetch the priority queue from Algorithm to frontend
+async function getPriorityQueue() {
+  try {
+    const response = await fetch("/api/compatibilityResults");
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.log(result.error);
+      return;
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Helper function
+async function refreshPriorityIndex() {
+  const priorityQueue = await getPriorityQueue();
+
+  priorityIndex = {};
+
+  priorityQueue.results.forEach(employee => {
+    const empId = employee.employeeId;
+
+    priorityIndex[empId] = {};
+
+    employee.priorities.forEach(p => {
+      priorityIndex[empId][p.jobId] = {
+        compatibility: p.compatibility,
+        priorityRank: p.priorityRank
+      };
+    });
+  });
 }
 
 // ===========================
@@ -229,6 +302,7 @@ function makeSortable(departments) {
 
       onEnd: function (evt) {
         syncDepartmentsFromDOM(); // sync from frontend
+        renderDepartments(); // acutally render when moving
         countAndDisplayEmployees();
         checkPlaceholders();
         updateSystemScore(); // live update systemScore
@@ -264,7 +338,8 @@ function updateSystemScore() {
 
     employeeDivs.forEach(div => {
       const id = Number(div.dataset.employeeId);
-      total += employeeIndex[id]?.compatibility ?? 0;
+      const jobId = job.id;
+      total += priorityIndex[id]?.[jobId]?.compatibility ?? 0;
       count++;
     });
   });
@@ -282,12 +357,18 @@ function syncDepartmentsFromDOM() {
 
     const employeeDivs = jobDiv.querySelectorAll(".employee");
 
-    job.employees = Array.from(employeeDivs).map(div => ({
-      employeeId: Number(div.dataset.employeeId),
-      compatibility: employeeIndex[Number(div.dataset.employeeId)]?.compatibility ?? 0,
-      employee: {
-        username: employeeIndex[Number(div.dataset.employeeId)]?.username ?? "Unknown"
-      }
-    }));
+    job.employees = Array.from(employeeDivs).map(div => {
+      const id = Number(div.dataset.employeeId);
+
+      const priorityData = priorityIndex[id]?.[job.id];
+
+      return {
+        employeeId: id,
+        compatibility: priorityData?.compatibility ?? 0,
+        employee: {
+          username: employeeIndex[id]?.username ?? "Unknown"
+        }
+      };
+    });
   });
 }

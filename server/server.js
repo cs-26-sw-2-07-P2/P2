@@ -6,7 +6,7 @@ const session = require("express-session");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("./prismaClient");
-const { default: PBC_Algorithm } = require("./algorithm");
+const { default: PBC_Algorithm, getCompatibilityResults } = require("./algorithm");
 
 // Variables
 const dev_mode = false; // only for development
@@ -236,7 +236,6 @@ app.post("/api/parameters", async (req, res) => {
 
 app.post("/api/jobs", async (req, res) => {
   const { name, capacity, parameters } = req.body;
-  const amountofEmployees = 0;
 
   if (!name) {
     return res.status(400).json({ error: "Name is required" });
@@ -247,7 +246,6 @@ app.post("/api/jobs", async (req, res) => {
       data: {
         name,
         capacity: Number(capacity),
-        amount: amountofEmployees, // There should be no employees when initialized
         parameters: {
           create: parameters.map(p => ({
             parameterId: p.parameterId,
@@ -653,9 +651,11 @@ app.post("/api/assignments/save", async (req, res) => {
     await prisma.$transaction(async (tx) => {
       await tx.assignment.deleteMany();
 
-      const cleaned = Array.from(
-        new Map(assignments.map(a => [a.employeeId, a])).values()
-      );
+    const cleaned = Array.from(
+      new Map(assignments.map(a => [a.employeeId, a])).values()).map(a => ({
+      ...a,
+      manuallyAdjusted: true,
+    }));
 
       await tx.assignment.createMany({
         data: cleaned
@@ -722,7 +722,6 @@ app.get("/api/employee", async (req, res) => {
 });
 
 app.post("/api/run-algorithm", async (req, res) => {
-
   if (!req.session.user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -753,6 +752,34 @@ app.post("/api/run-algorithm", async (req, res) => {
     });
   }
 });
+
+app.get("/api/compatibilityResults", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const manager = await prisma.manager.findUnique({
+      where: { userId: req.session.user.id },
+    });
+
+    if (!manager) {
+      return res.status(403).json({ error: "Not a manager" });
+    }
+
+    const results = await getCompatibilityResults();
+
+    res.json({
+      results
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Failed to fetch compatibility results!"
+    });
+  }
+})
 
 // Routing
 const routes = [

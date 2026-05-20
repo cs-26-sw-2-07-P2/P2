@@ -210,7 +210,6 @@ const physicalJob = {
 test("Check for correct job assignment", () => {
     const results = calculateCompatibility([socialUser, physicalUser], [socialJob, physicalJob]);
     const { jobMap } = distributeEmployees(results, [socialJob, physicalJob]);
-    console.log(JSON.stringify(jobMap, null, 2));
     expect(jobMap[1].employees[0].employee.username).toBe("Chandler");
     expect(jobMap[2].employees[0].employee.username).toBe("Denice");
 })
