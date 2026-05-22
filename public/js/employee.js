@@ -190,6 +190,7 @@ async function renderTeam() {
 
     document.querySelector("#containerTeam").innerHTML = `
       <table border="1" cellpadding="8">
+      <h1>${assignment.job.name}</h1>
         <thead>
           <tr>
             <th>Name</th>
